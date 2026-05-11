@@ -12,6 +12,8 @@ dependencies = [
     "ipykernel>=6.20.0",
     "pyyaml>=6.0.0",
     "jupyter>=1.0.0",
+    "osmnx>=2.0.7",
+    "h3>=4.4.2",
 ]
 
 [tool.uv]
