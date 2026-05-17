@@ -58,3 +58,4 @@ Thumbs.db
 ### Data
 *.pbf
 
+data/Taxi_Trips.csv
