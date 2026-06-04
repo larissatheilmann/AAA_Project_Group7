@@ -59,3 +59,5 @@ Thumbs.db
 *.pbf
 
 data/Taxi_Trips.csv
+data/taxi_data_processed.parquet
+data/final_grid.parquet
