@@ -57,7 +57,7 @@ Thumbs.db
 
 ### Data
 *.pbf
-notebook/cache/
+notebooks/cache/
 
 data/Taxi_Trips.csv
 data/taxi_data_processed.parquet
