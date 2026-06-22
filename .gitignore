@@ -62,5 +62,7 @@ Thumbs.db
 notebooks/cache/
 
 data/Taxi_Trips.csv
-data/taxi_data_processed.parquet
-data/final_grid.parquet
+data/processed/taxi_data_processed.parquet
+data/processed/final_grid.parquet
+data/processed/prediction_features.parquet
+data/processed/aggregated_grid.parquet
