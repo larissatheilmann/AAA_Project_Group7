@@ -18,6 +18,7 @@ dependencies = [
     "folium>=0.20.0",
     "contextily>=1.7.0",
     "mapclassify>=2.8.1",
+    "holidays>=0.98",
     "torch>=2.12.0",
 ]
 

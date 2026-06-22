@@ -4,7 +4,7 @@ _site/
 _freeze/
 *.quarto_ipynb_*
 *.pdf
-*.html
+!docs/maps/*.html
 *.docx
 *.tex
 # Exception for partials tex files
@@ -51,6 +51,8 @@ CLAUDE.md
 # OS specific
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
 
 /.quarto/
 **/*.quarto_ipynb
@@ -60,5 +62,7 @@ Thumbs.db
 notebooks/cache/
 
 data/Taxi_Trips.csv
-data/taxi_data_processed.parquet
-data/final_grid.parquet
+data/processed/taxi_data_processed.parquet
+data/processed/final_grid.parquet
+data/processed/prediction_features.parquet
+data/processed/aggregated_grid.parquet
