@@ -23,10 +23,16 @@ date: 2026-04-01 # Date of submission
 
 {{< include sections/01-introduction.qmd >}}
 
-{{< include sections/02-analysis.qmd >}}
+{{< include sections/02-data.qmd >}}
 
-# Citations and References
-You can easily cite your sources using BibLaTeX. For example, you can cite the Quarto documentation [@quarto2024] or a textbook like "R for Data Science" [@wickham2023]. The bibliography will be automatically generated at the end of the document.
+{{< include sections/03-exploratory-analysis.qmd >}}
 
-# Conclusion
-The conclusion should summarize your findings and suggest future work.
+{{< include sections/04-demand-prediction.qmd >}}
+
+{{< include sections/05-reinforcement-learning.qmd >}}
+
+{{< include sections/06-conclusion.qmd >}}
+
+# References {.unnumbered}
+::: {#refs}
+:::

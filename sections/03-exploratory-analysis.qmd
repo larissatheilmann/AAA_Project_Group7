@@ -1,0 +1,26 @@
+# Exploratory Data Analysis {#sec-eda}
+
+We explore taxi demand along the spatial, temporal, and weather dimensions to
+build intuition before modelling.
+
+## Spatial Patterns
+
+<!-- Source notebook: notebooks/2.1 DescriptiveAnalysisSpatial.ipynb -->
+<!-- TODO: Where is demand concentrated? Add `#| label: fig-...` to notebook
+cells and embed, e.g.
+{{< embed "notebooks/2.1 DescriptiveAnalysisSpatial.ipynb#fig-your-label" >}} -->
+
+## Temporal Patterns
+
+<!-- Source notebook: notebooks/2.2 DescriptiveAnalysisTemporal.ipynb -->
+<!-- TODO: Hour-of-day, day-of-week, seasonal and holiday effects. -->
+
+## Space-Time Hexagon Visualisation
+
+<!-- Source notebook: notebooks/2.3 TempHexagonVis.ipynb -->
+<!-- TODO: Combined space-time view over the H3 grid. -->
+
+## Weather Effects
+
+<!-- Source notebook: notebooks/descriptive_analytics_weather.ipynb -->
+<!-- TODO: Relationship between weather conditions and demand. -->

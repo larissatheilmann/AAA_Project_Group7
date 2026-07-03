@@ -1,0 +1,13 @@
+# Conclusion {#sec-conclusion}
+
+## Summary of Findings
+
+<!-- TODO: Recap the answers to the research questions from the introduction. -->
+
+## Limitations
+
+<!-- TODO: Data, modelling and methodological limitations. -->
+
+## Future Work
+
+<!-- TODO: Concrete next steps and extensions. -->

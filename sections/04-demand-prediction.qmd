@@ -1,0 +1,44 @@
+# Demand Prediction {#sec-prediction}
+
+We predict hourly taxi demand per H3 cell and compare a Support Vector Machine
+baseline against a deep-learning model, evaluated on a held-out test split.
+
+## Feature Engineering
+
+<!-- Source notebooks: notebooks/3.1 FeatureEngineering_Res7.ipynb and _Res8.ipynb -->
+<!-- TODO: Spatial (H3 res 7/8), temporal, POI and weather features; the
+train/validation/test split (data/prediction_split/res_7, res_8);
+output data/processed/prediction_features.parquet. Discuss the res-7 vs res-8
+trade-off. -->
+
+## Support Vector Machine
+
+<!-- Source notebook: notebooks/3.2 PredictionSVM.ipynb -->
+<!-- TODO: Kernel, hyperparameter search, trained models in models/. The cells
+in this notebook are not yet labelled — add `#| label: fig-...` / `#| label: tbl-...`
+to embed them here. -->
+
+## Deep Learning Model
+
+<!-- Source notebooks: notebooks/3.3 PredictionDeepLearning_Res7.ipynb and _Res8.ipynb -->
+<!-- TODO: Network architecture, training setup, results per resolution. -->
+
+## Model Performance
+
+<!-- Source notebook: notebooks/3.4 ModelPerformanceVisualization.ipynb -->
+
+Predicted versus actual demand on the test set, and the spatial distribution of
+the prediction error across Chicago (mean absolute error, mean relative error,
+and the coefficient of determination per hexagon).
+
+<!-- NOTE: These cells are labelled but not yet executed with saved outputs, so
+the embeds are disabled below (the shortcode braces are removed so Quarto does
+not try to expand them). Run "3.4 ModelPerformanceVisualization.ipynb", save it,
+then wrap each line in the embed shortcode: {{< embed "PATH#LABEL" >}}
+    notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-pred-vs-actual
+    notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-mae
+    notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-mre
+    notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-r2
+-->
+
+<!-- TODO: Compare SVM vs deep learning, interpret spatial error, note limitations. -->

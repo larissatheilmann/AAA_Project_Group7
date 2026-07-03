@@ -1,0 +1,24 @@
+# EV Charging Station Placement {#sec-rl}
+
+We frame charging-station placement for the taxi fleet as a Markov Decision
+Process and solve it with Q-learning, using the predicted demand as the
+environment signal.
+
+## Problem Formulation
+
+<!-- Source notebook: notebooks/4.1 ReinforcementLearning.ipynb -->
+<!-- TODO: Define the MDP — states, actions, reward, transition — and how
+predicted demand feeds the environment. -->
+
+## Q-Learning Setup
+
+<!-- TODO: Algorithm, hyperparameters (learning rate, discount, exploration),
+training loop and convergence. -->
+
+## Learned Policy
+
+The heatmap below shows the learned placement policy over the grid.
+
+{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#fig-policy-heatmap" >}}
+
+<!-- TODO: Interpret the policy and discuss placement recommendations. -->

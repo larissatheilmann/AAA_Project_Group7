@@ -1,4 +1,25 @@
 # Introduction
-This report serves as a template for your team project. It is built using Quarto, which allows you to integrate your Python or R analysis directly into your writing.
 
-By using this template, you ensure that your formatting (margins, line spacing, and fonts) matches the required standards for submission. The left margin is set to 4cm to allow for comments, while the other margins are 2.5cm. Line spacing is set to 1.5, and the main font is Times New Roman.
+<!-- TODO: Motivate the problem. What question does this report answer, and why
+does it matter for the City of Chicago / taxi operators / EV infrastructure? -->
+
+## Motivation and Problem Statement
+
+<!-- TODO: 1-2 paragraphs framing the business/analytics problem. -->
+
+## Research Questions
+
+<!-- TODO: List the concrete questions this report addresses, e.g.
+1. How is taxi demand distributed across space and time in Chicago?
+2. Can hourly demand per H3 cell be predicted from spatial, temporal, POI and
+   weather features?
+3. Where should EV charging stations be placed to best serve taxi demand? -->
+
+## Report Structure
+
+The remainder of this report is organised as follows.
+@sec-data describes the data sources and preparation pipeline.
+@sec-eda presents the exploratory spatial and temporal analysis.
+@sec-prediction develops and evaluates the demand-prediction models.
+@sec-rl applies reinforcement learning to charging-station placement.
+@sec-conclusion concludes and outlines future work.
