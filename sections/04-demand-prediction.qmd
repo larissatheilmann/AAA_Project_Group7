@@ -1,31 +1,56 @@
 # Demand Prediction {#sec-prediction}
 
-We predict hourly taxi demand per H3 cell and compare a Support Vector Machine
-baseline against a deep-learning model, evaluated on a held-out test split.
+<!-- ASSIGNMENT Task 3 — Predictive Analytics (a) SVM and (b) Neural Networks:
+- Predict taxi demand for each spatial unit (hexagon AND census tract) and time
+  bucket (e.g. 08:00-11:59). This is NOT autoregressive: do NOT predict hour x+1
+  from hour x. The target question is e.g. "what demand can we expect on a rainy
+  Sunday 10-11am on the outskirts?".
+- Advise and justify a validation strategy (define train / validation / test).
+- SVM: start WITHOUT a kernel, then add kernels; use grid search for
+  hyperparameters; evaluate performance and comment on shortfalls; show how
+  performance varies with temporal/spatial resolution and when using census tract
+  only; discuss improvement levers for a follow-up.
+- Deep learning: repeat with a feedforward neural network; is performance very
+  different?
+- Compare SVM vs. NN on the SAME holdout with the same resolution — is deep
+  learning worth it? -->
+
+We predict demand per spatial unit and time bucket and compare a Support Vector
+Machine against a feedforward neural network on a common holdout set.
+
+## Problem Setup and Validation Strategy
+
+<!-- TODO: State the prediction target (spatial unit x time bucket, non-
+autoregressive), the feature set, and the train/validation/test split. Justify
+the validation strategy. -->
 
 ## Feature Engineering
 
 <!-- Source notebooks: notebooks/3.1 FeatureEngineering_Res7.ipynb and _Res8.ipynb -->
-<!-- TODO: Spatial (H3 res 7/8), temporal, POI and weather features; the
-train/validation/test split (data/prediction_split/res_7, res_8);
-output data/processed/prediction_features.parquet. Discuss the res-7 vs res-8
-trade-off. -->
+<!-- TODO: Spatial (H3 res 7/8, and census tract), temporal (hour/day/holiday),
+POI and weather features; the split (data/prediction_split/res_7, res_8); output
+data/processed/prediction_features.parquet. -->
 
 ## Support Vector Machine
 
 <!-- Source notebook: notebooks/3.2 PredictionSVM.ipynb -->
-<!-- TODO: Kernel, hyperparameter search, trained models in models/. The cells
-in this notebook are not yet labelled — add `#| label: fig-...` / `#| label: tbl-...`
-to embed them here. -->
+<!-- TODO: Follow the assignment recipe: linear (no kernel) baseline -> add
+kernels -> GridSearchCV hyperparameters. Report metrics, comment on shortfalls,
+and show performance vs. resolution (res 7 vs 8 vs census tract). Trained models
+in models/svr_best*.joblib. NOTE: cells here are not yet labelled — add
+`#| label: fig-...` / `tbl-...` to embed them. -->
 
 ## Deep Learning Model
 
 <!-- Source notebooks: notebooks/3.3 PredictionDeepLearning_Res7.ipynb and _Res8.ipynb -->
-<!-- TODO: Network architecture, training setup, results per resolution. -->
+<!-- TODO: Feedforward NN architecture, training setup, results per resolution. -->
 
-## Model Performance
+## Model Comparison
 
 <!-- Source notebook: notebooks/3.4 ModelPerformanceVisualization.ipynb -->
+
+<!-- TODO: Compare SVM vs. NN on the same holdout and resolution. Conclude
+whether deep learning is worth it, and list improvement levers. -->
 
 Predicted versus actual demand on the test set, and the spatial distribution of
 the prediction error across Chicago (mean absolute error, mean relative error,
@@ -40,5 +65,3 @@ then wrap each line in the embed shortcode: {{< embed "PATH#LABEL" >}}
     notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-mre
     notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-r2
 -->
-
-<!-- TODO: Compare SVM vs deep learning, interpret spatial error, note limitations. -->

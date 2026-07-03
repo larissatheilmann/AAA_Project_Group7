@@ -1,24 +1,50 @@
-# EV Charging Station Placement {#sec-rl}
+# Smart Charging with Reinforcement Learning {#sec-rl}
 
-We frame charging-station placement for the taxi fleet as a Markov Decision
-Process and solve it with Q-learning, using the predicted demand as the
-environment signal.
+<!-- ASSIGNMENT Task 4 — Smart Charging Using Reinforcement Learning:
+An electric taxi driver charges at home. The vehicle arrives at 2 p.m. and leaves
+at 4 p.m. daily. Design an automated charging agent that:
+- adjusts charging power every 15 minutes, bounded between 0 kW and a max (e.g. 22 kW);
+- must not exceed the battery capacity;
+- faces a STOCHASTIC energy demand at departure ~ Normal (choose params, e.g.
+  mu = 30 kWh, sigma = 5 kWh), realised exactly when the driver leaves;
+- goal: avoid running out of energy (very HIGH penalty) AND minimise recharging cost;
+- recharging cost is exponential in power: cost(t,p) = sum over t of alpha_t * e^p,
+  where alpha_t is a time coefficient and p the charging rate.
+Deliverables:
+- Build the ENVIRONMENT as a simple discrete-event simulation returning rewards.
+- Define the MDP explicitly: states, actions, reward function.
+- Solve with an RL algorithm (e.g. deep Q-network); discrete actions are allowed
+  (e.g. zero / low / medium / high). -->
 
-## Problem Formulation
+<!-- ⚠️ DISCREPANCY TO RESOLVE: notebook 4.1 ReinforcementLearning.ipynb currently
+implements EV charging-STATION PLACEMENT over the spatial grid (fig-policy-heatmap),
+which is NOT what Task 4 asks. Task 4 is a home charging-SCHEDULE agent (the 15-min
+power decisions above). Either (a) add/refit a notebook for the charging-schedule
+MDP and re-point the embeds, or (b) confirm with the team which problem is intended.
+The embed below is kept live only so the report still renders. -->
 
-<!-- Source notebook: notebooks/4.1 ReinforcementLearning.ipynb -->
-<!-- TODO: Define the MDP — states, actions, reward, transition — and how
-predicted demand feeds the environment. -->
+## Problem Formulation (MDP)
 
-## Q-Learning Setup
+<!-- TODO: Define states (e.g. time-of-day step, state-of-charge), actions
+(discrete charging levels zero/low/medium/high, or 0-22 kW), transition, and the
+reward = -(recharging cost) - (penalty if energy demand not met at departure).
+State the chosen distribution parameters and cost coefficients. -->
+
+## Environment (Discrete-Event Simulation)
+
+<!-- TODO: Describe the simulation: 2 p.m. arrival, 4 p.m. departure, 15-min
+steps, battery capacity constraint, stochastic demand drawn at departure. -->
+
+## Q-Learning / DQN Setup
 
 <!-- TODO: Algorithm, hyperparameters (learning rate, discount, exploration),
 training loop and convergence. -->
 
 ## Learned Policy
 
-The heatmap below shows the learned placement policy over the grid.
+The heatmap below shows the learned policy.
 
 {{< embed "notebooks/4.1 ReinforcementLearning.ipynb#fig-policy-heatmap" >}}
 
-<!-- TODO: Interpret the policy and discuss placement recommendations. -->
+<!-- TODO: Interpret the optimal charging policy (when/how much to charge) and
+its cost vs. reliability trade-off. -->

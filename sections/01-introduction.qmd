@@ -1,19 +1,27 @@
 # Introduction
 
-<!-- TODO: Motivate the problem. What question does this report answer, and why
-does it matter for the City of Chicago / taxi operators / EV infrastructure? -->
+<!-- ASSIGNMENT FRAMING (Task: Background):
+We act as the Data Science Team of "Bane & Wayne Partners" (BWP), a management
+consultancy. The client is a German car manufacturer building a ride-hailing
+platform for the US market with a fully electrified vehicle fleet. Chicago taxi
+trips are used as a proxy for ride-hailing demand. The client wants to understand
+ride-hailing dynamics in temporal and spatial resolution. Frame the whole report
+as advice to this client, and end each analysis with a clear "so what?". -->
 
 ## Motivation and Problem Statement
 
-<!-- TODO: 1-2 paragraphs framing the business/analytics problem. -->
+<!-- TODO: Motivate smart mobility / ride-hailing with electric fleets, and the
+client's lack of tactical/strategic know-how in EV fleet operations. -->
 
 ## Research Questions
 
-<!-- TODO: List the concrete questions this report addresses, e.g.
-1. How is taxi demand distributed across space and time in Chicago?
-2. Can hourly demand per H3 cell be predicted from spatial, temporal, POI and
-   weather features?
-3. Where should EV charging stations be placed to best serve taxi demand? -->
+<!-- TODO: State the concrete questions, aligned to the assignment tasks:
+1. How is taxi demand distributed across space and time, and why? (descriptive)
+2. Where are the spatial demand hot spots? (GMM / kernel density)
+3. Can demand per spatial unit and time bucket be predicted with SVM and neural
+   networks — e.g. "what demand on a rainy Sunday 10-11am on the outskirts"?
+4. What is an optimal home-charging policy for an electric taxi (RL)?
+5. What should the client do — including private vs. public charging? -->
 
 ## Report Structure
 
@@ -21,5 +29,9 @@ The remainder of this report is organised as follows.
 @sec-data describes the data sources and preparation pipeline.
 @sec-eda presents the exploratory spatial and temporal analysis.
 @sec-prediction develops and evaluates the demand-prediction models.
-@sec-rl applies reinforcement learning to charging-station placement.
-@sec-conclusion concludes and outlines future work.
+@sec-rl applies reinforcement learning to smart charging.
+@sec-conclusion discusses implications for the client and outlines future work.
+
+<!-- TIP (assignment notes): make generous use of visualization; justify every
+methodological choice; interpret results for a non-technical audience; an
+Appendix may be used for supporting figures/code not needed in the main body. -->

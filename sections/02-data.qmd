@@ -1,36 +1,52 @@
 # Data and Preparation {#sec-data}
 
+<!-- ASSIGNMENT Task 1 — Data Collection and Preparation:
+- Taxi trip data (Chicago Data Portal, 2024 onwards). The raw CSV is large; note
+  any preprocessing (e.g. sed/xsv to filter rows/columns) used to make it usable.
+- Provide a DETAILED description of the trip dataset so no questions remain.
+- Spatial data is only given at census-tract level (privacy). Discretise the city
+  into an H3 hexagon grid (h3-Uber) AND keep census tract as an alternative unit —
+  both are needed later for the resolution comparison in EDA and prediction.
+- Consider MULTIPLE temporal discretisations (hourly, 4-hourly, daily) and justify
+  the choice used downstream.
+- Hourly weather data collected independently (e.g. NOAA / ERA5 / Kaggle); note
+  that temporal resolution of weather may affect predictive power.
+- POI data (OpenStreetMap) is optional — justify why it is included. -->
+
 This section describes the raw data sources and the preparation pipeline that
 turns them into the analysis-ready datasets used throughout the report.
 
 ## Data Sources
 
 <!-- TODO: Describe each raw source, its origin, coverage and granularity.
-- Chicago Taxi Trips (data/Taxi_Trips.csv)
-- ERA5 weather (data/weather_data.parquet)
-- OpenStreetMap POIs (data/chicago_pois_download.gpkg)
-- Chicago community areas (data/chicago_community_areas.gpkg) -->
+- Chicago Taxi Trips (data/Taxi_Trips.csv) — variables, units, time range.
+- Weather (data/weather_data.parquet) — source, variables, temporal resolution.
+- OpenStreetMap POIs (data/chicago_pois_download.gpkg).
+- Chicago community areas / census tracts (data/chicago_community_areas.gpkg). -->
 
-## Taxi Trip Preparation
+## Taxi Trip Description and Cleaning
 
 <!-- Source notebook: notebooks/1.1 TaxiDataPrep.ipynb -->
-<!-- TODO: Cleaning steps, filtering, output data/processed/taxi_data_processed.parquet.
-Add `#| label: fig-...` to the relevant notebook cells, then embed here:
-{{< embed "notebooks/1.1 TaxiDataPrep.ipynb#fig-your-label" >}} -->
+<!-- TODO: Detailed dataset description (fields, ranges, missingness), cleaning
+and filtering steps, any large-CSV preprocessing, output
+data/processed/taxi_data_processed.parquet. Add `#| label:` to notebook cells to
+embed a summary table / distribution plots. -->
 
 ## Weather Data
 
 <!-- Source notebook: notebooks/1.2 WeatherDataPrep.ipynb -->
-<!-- TODO: ERA5 retrieval/processing, output data/weather_data.parquet. -->
+<!-- TODO: Retrieval and processing; justify chosen temporal resolution and its
+possible impact on predictive power. Output data/weather_data.parquet. -->
 
 ## Points of Interest
 
 <!-- Source notebook: notebooks/1.3 POIDataPrep.ipynb -->
-<!-- TODO: OSMnx extraction, categorisation, H3 aggregation
-(data/processed/chicago_pois_agg_{7,8}.csv). -->
+<!-- TODO: OSMnx extraction, categorisation, H3 aggregation at res 7 and 8
+(data/processed/chicago_pois_agg_{7,8}.csv). Justify inclusion of POI. -->
 
-## Spatial Aggregation
+## Spatial and Temporal Discretisation
 
 <!-- Source notebook: notebooks/1.4 HourlySpatialAggregation.ipynb -->
-<!-- TODO: H3 hex grid (resolution 7 and 8), hourly aggregation, join of taxi +
-weather + POI into data/processed/aggregated_grid_{7,8}.parquet. -->
+<!-- TODO: H3 hex grid (resolution 7 and 8) vs. census tract; hourly aggregation
+and any coarser temporal bins; join of taxi + weather + POI into
+data/processed/aggregated_grid_{7,8}.parquet. Explain why resolutions 7 and 8. -->
