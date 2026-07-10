@@ -1,15 +1,17 @@
 ---
 title: "Project Report Template" # Give your report a title
 course: "Advanced Analytics and Applications" # Specify the course name
-team: "00" # Specify your team number
+team: "07" # Specify your team number
 author:
-  - name: Student 1
-    student-id: "111111111"
-  - name: Student 2
-    student-id: "222222222"
-  - name: Student 3
-    student-id: "333333333"
-contact: student@smail.uni-koeln.de # Specify one contact for the project
+  - name: Larissa Theilmann
+    student-id: "7432976"
+  - name: Emre Uyar
+    student-id: "7443638"
+  - name: Tjorge Orlitz
+    student-id: "7443662"
+  - name: Nils Hornstein
+    student-id: "7369566"
+contact: torlitz@smail.uni-koeln.de # Specify one contact for the project
 supervisor: "Univ.-Prof. Dr. Wolfgang Ketter"
 co-supervisor: "Janik Muires" # TA of the course is the co-supervisor
 date: 2026-04-01 # Date of submission
