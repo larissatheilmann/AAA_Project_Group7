@@ -66,3 +66,6 @@ data/processed/taxi_data_processed.parquet
 data/processed/final_grid.parquet
 data/processed/prediction_features.parquet
 data/processed/aggregated_grid.parquet
+data/Taxi_Trips_big.csv
+data/processed/taxi_data_processed_big.parquet
+data/processed/taxi_data_processed_small.parquet
