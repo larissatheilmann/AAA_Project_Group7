@@ -33,19 +33,19 @@ data/processed/prediction_features.parquet. -->
 
 ## Support Vector Machine
 
-<!-- Source notebook: notebooks/3.2 PredictionSVM.ipynb -->
+<!-- Source notebook: notebooks/3.2a PredictionSVM_Standard.ipynb -->
 <!-- TODO: Follow the assignment recipe: linear (no kernel) baseline -> add
 kernels -> GridSearchCV hyperparameters. Report metrics, comment on shortfalls,
 and show performance vs. resolution (res 7 vs 8 vs census tract). Trained models
-in models/svr_best*.joblib. NOTE: cells here are not yet labelled — add
+in models_predictions/SVR/standard/models/. NOTE: cells here are not yet labelled — add
 `#| label: fig-...` / `tbl-...` to embed them. -->
 
 ### Shortfalls and Improvement Levers {#sec-svm-shortfalls}
 
 <!-- DRAFT bullets for later revisiting -- expand into prose once the final
 tables/figures (tbl-svr-level-comparison, tbl-svr-permutation, tbl-svr-ablation,
-tbl-svr-redundancy) are embedded. Numbers below are from the completed 3.2 run
-(models/svr/level_comparison.csv, permutation_importance_blocks.csv,
+tbl-svr-redundancy) are embedded. Numbers below are from the completed 3.2a run
+(models_predictions/SVR/standard/models/level_comparison.csv, permutation_importance_blocks.csv,
 drop_column_ablation.csv). -->
 
 - **The SVR barely beats, and at three of eight granularities loses to, a
@@ -81,7 +81,28 @@ drop_column_ablation.csv). -->
   what's predictable — a historical mean over those same keys is close to
   optimal, so there is limited room for a learned model to add value without
   reintroducing autoregressive signal, which is out of scope here.
-- **Legitimate, non-autoregressive improvement levers for a follow-up:**
+- **Tested improvement lever — residual-on-baseline, tuned from scratch on
+  test — improves 6 of 8 levels, with two small regressions traced to
+  validation-selection variance, not the reframing itself.** Instead of fitting
+  the SVR to predict `log1p(demand)` from scratch, we fit it to predict the
+  log-space correction `log1p(demand) - log1p(base_demand)` and reconstruct
+  `demand_hat = expm1(log1p(base_demand) + correction_hat)`, with the kernel and
+  `C`/`gamma` search run directly on the residual target (not reused from the
+  direct model) via a manual K-fold grid search (`GridSearchCV`'s scorer cannot
+  reconstruct counts from a residual prediction without the row's
+  `base_demand`, which it never sees). The gain is largest exactly where the
+  direct model struggled most: `census/hourly` closes more than half its gap to
+  zero (-25.8% → -13.3%, +12.6 points), and `community/hourly` flips from a
+  coin-flip (+1.3%) to a clear win (+5.7%); `h3_7/hourly`, `h3_7/daily`, and
+  `h3_8/daily` each improve by ~3 points. Two levels get slightly worse —
+  `h3_8/hourly` (-10.8% → -14.6%) and `census/daily` (+6.3% → +6.1%) — and in
+  both cases the from-scratch search picked a *different, more complex*
+  configuration than the direct model (a different feature set, and at
+  `h3_8/hourly` also a different kernel), a sign of validation-selection
+  variance at these noisier levels rather than the residual target itself being
+  worse: every level where the *same* feature set and kernel were re-evaluated
+  with only the target changed showed a genuine improvement.
+- **Other legitimate, non-autoregressive improvement levers for a follow-up:**
   - Weather × hour and weather × spatial interaction terms (currently weather
     is city-wide and hourly, i.e. no spatial variation across cells within the
     same hour).
