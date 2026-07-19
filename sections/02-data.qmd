@@ -116,9 +116,10 @@ level: a count of points, a count of distinct POI types, and the categorized
 counts in wide format with one column per category. At resolution 7, 152
 hexagons contain at least one point of interest; at resolution 8, that rises
 to 806 hexagons, since the finer grid packs the same points into a larger
-number of smaller cells. These per-hexagon POI counts and category breakdowns
-feed directly into the feature set used for demand prediction in
-@sec-prediction.
+number of smaller cells. The resolution-7 counts feed into the feature set used
+for demand prediction in @sec-prediction, alongside POI aggregations at
+census-tract and community-area level; the resolution-8 aggregation is retained
+for the spatial exploratory analysis in @sec-eda.
 
 ## Spatial and Temporal Discretisation
 
