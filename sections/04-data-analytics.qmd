@@ -37,7 +37,10 @@ between trips; start vs. end location patterns. Interpret and give reasons. -->
 
 ### Effect of Spatio-Temporal Resolution
 
-<!-- Source notebook: notebooks/2.3 TempHexagonVis.ipynb -->
+<!-- STATUS: notebooks/2.3 TempHexagonVis.ipynb was removed (it was already broken -- referenced
+a taxi parquet filename the pipeline never produces -- and its only other dependency, POI
+resolution-8 aggregation, has since been dropped as unused). This subsection has NO source
+notebook right now and needs one written from scratch. -->
 <!-- TODO: Explicitly compare how patterns change between census tract vs.
 hexagon resolution 7 vs. 8, and across temporal bin sizes (hourly / 4-hourly /
 daily). This directly answers the assignment's resolution comparison. -->
