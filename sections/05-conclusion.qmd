@@ -1,0 +1,31 @@
+# Discussion and Outlook {#sec-conclusion}
+
+<!-- ASSIGNMENT Task 5 — Discussion & Outlook:
+- Discuss the implications of ALL results for the potential fleet operator (client).
+- Which further analyses would be useful on the given dataset?
+- Which other external data sources might be interesting?
+- Is it sensible to install PRIVATE charging stations, or should the operator draw
+  on PUBLIC charging stations? Give a recommendation.
+Keep the framing consultative and non-technical; state the "so what?" clearly. -->
+
+## Summary of Findings
+
+<!-- TODO: Recap the answers to the research questions from the introduction
+(demand patterns, hot spots, prediction accuracy, charging policy). -->
+
+## Implications for the Client
+
+<!-- TODO: Translate findings into actionable advice for the fleet operator.
+Include a clear recommendation on private vs. public charging infrastructure. -->
+
+## Limitations
+
+<!-- TODO: Data, modelling and methodological limitations. -->
+
+## Future Work
+
+<!-- TODO: Further analyses on this dataset and useful external data sources. -->
+
+<!-- OPTIONAL: Appendix — the assignment allows an appendix for supporting
+figures/code not needed in the main body. Add a "# Appendix {.unnumbered}"
+section here or in report.qmd if desired. -->

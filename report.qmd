@@ -25,15 +25,13 @@ date: 2026-04-01 # Date of submission
 
 {{< include sections/01-introduction.qmd >}}
 
-{{< include sections/02-data.qmd >}}
+{{< include sections/02-data-description.qmd >}}
 
-{{< include sections/03-exploratory-analysis.qmd >}}
+{{< include sections/03-data-preparation.qmd >}}
 
-{{< include sections/04-demand-prediction.qmd >}}
+{{< include sections/04-data-analytics.qmd >}}
 
-{{< include sections/05-reinforcement-learning.qmd >}}
-
-{{< include sections/06-conclusion.qmd >}}
+{{< include sections/05-conclusion.qmd >}}
 
 # References {.unnumbered}
 ::: {#refs}

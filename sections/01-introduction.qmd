@@ -81,10 +81,11 @@ into the next.
 ## Report Structure
 
 The remainder of this report is organised as follows.
-@sec-data describes the data sources and preparation pipeline.
-@sec-eda presents the exploratory spatial and temporal analysis.
-@sec-prediction develops and evaluates the demand-prediction models.
-@sec-rl applies reinforcement learning to smart charging.
+@sec-data describes the data sources.
+@sec-data-prep describes the preparation pipeline.
+@sec-analytics presents the descriptive spatial analysis, the
+demand-prediction models, and the reinforcement-learning approach to smart
+charging.
 @sec-conclusion discusses implications for the client and outlines future work.
 
 <!-- TIP (assignment notes): make generous use of visualization; justify every
