@@ -17,15 +17,19 @@ the cleaning and feature-engineering steps applied to each follow in
 @sec-data-prep.
 
 The taxi trip records come from the Chicago Data Portal's Taxi Trips dataset.
-Before import, the file was already filtered to drop trips missing a pickup or
-dropoff census tract and trips with zero recorded seconds or miles, and
-trimmed to sixteen fields: trip and taxi identifiers, start and end
-timestamps, trip duration and distance, pickup and dropoff census tract and
-community area codes, the fare total, the operating company, and pickup and
-dropoff coordinates. What remains is 6,041,177 trips spanning January 2024
-through April 2026, each one a dispatched, metered ride at whatever time and
-location a passenger requested it, which is the pattern the client's own
-fleet will eventually have to anticipate.
+Before use, invalid rows (missing key identifiers, non-positive trip duration,
+or negative distance or fare) were dropped, and the table was trimmed to
+sixteen fields: trip and taxi identifiers, start and end timestamps, trip
+duration and distance, pickup and dropoff census tract and community area
+codes, the fare total, the operating company, and pickup and dropoff
+coordinates. Because census tract is missing from just over half of all trips
+(a mix of privacy suppression and trips ending outside Chicago) while
+community area is missing from under 9%, the cleaned data is kept as two
+parallel datasets: 14,494,804 trips with a known community area, and a
+stricter 6,835,451 trips that also have a known census tract. Both span
+January 1, 2024 through May 31, 2026, and each trip is a dispatched, metered
+ride at whatever time and location a passenger requested it, which is the
+pattern the client's own fleet will eventually have to anticipate.
 
 Weather observations come from the ERA5-Land reanalysis product, pulled
 through the Copernicus Climate Data Store API for a single coordinate near
