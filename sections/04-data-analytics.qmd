@@ -1,4 +1,59 @@
-# Demand Prediction {#sec-prediction}
+# Data Analytics {#sec-analytics}
+
+This section covers all analytical methods applied to the prepared data:
+descriptive spatial analytics, predictive modelling of demand (SVM and
+neural networks), and reinforcement learning for smart charging.
+
+## Descriptive (Spatial) Analytics {#sec-eda}
+
+<!-- ASSIGNMENT Task 2 — Descriptive (Spatial) Analytics:
+- Analyse taxi demand patterns: start time, trip length, start & end location,
+  price, and average idle time between trips (among others).
+- Show how these patterns VARY across spatio-temporal resolution: census tract vs.
+  varying hexagon diameter (res 7 vs 8) and/or temporal bin sizes.
+- Give plausible REASONS for the observed patterns.
+- Identify spatial demand HOT SPOTS using Gaussian Mixture Models (i.e. spatial
+  kernel density estimation). -->
+
+We explore taxi demand along the spatial, temporal, and weather dimensions to
+build intuition before modelling.
+
+### Demand Patterns
+
+<!-- Source notebooks: notebooks/2.1 DescriptiveAnalysisSpatial.ipynb,
+notebooks/2.2 DescriptiveAnalysisTemporal.ipynb -->
+<!-- TODO: Distributions of start time, trip length, price, and average idle time
+between trips; start vs. end location patterns. Interpret and give reasons. -->
+
+### Spatial Patterns
+
+<!-- Source notebook: notebooks/2.1 DescriptiveAnalysisSpatial.ipynb -->
+<!-- TODO: Where is demand concentrated? Maps at different spatial units. -->
+
+### Temporal Patterns
+
+<!-- Source notebook: notebooks/2.2 DescriptiveAnalysisTemporal.ipynb -->
+<!-- TODO: Hour-of-day, day-of-week, seasonal and holiday effects. -->
+
+### Effect of Spatio-Temporal Resolution
+
+<!-- Source notebook: notebooks/2.3 TempHexagonVis.ipynb -->
+<!-- TODO: Explicitly compare how patterns change between census tract vs.
+hexagon resolution 7 vs. 8, and across temporal bin sizes (hourly / 4-hourly /
+daily). This directly answers the assignment's resolution comparison. -->
+
+### Demand Hot Spots (GMM / Kernel Density)
+
+<!-- TODO: Fit a Gaussian Mixture Model / spatial kernel density estimate to
+identify demand hot spots. NOTE: check whether a notebook implements this — it
+may still need to be created. -->
+
+### Weather Effects
+
+<!-- Source notebook: notebooks/descriptive_analytics_weather.ipynb -->
+<!-- TODO: Relationship between weather conditions and demand. -->
+
+## Predictive Analytics (SVM & Neural Networks) {#sec-prediction}
 
 <!-- ASSIGNMENT Task 3 — Predictive Analytics (a) SVM and (b) Neural Networks:
 - Predict taxi demand for each spatial unit (hexagon AND census tract) and time
@@ -18,21 +73,14 @@
 We predict demand per spatial unit and time bucket and compare a Support Vector
 Machine against a feedforward neural network on a common holdout set.
 
-## Problem Setup and Validation Strategy
+### Problem Setup and Validation Strategy
 
 <!-- TODO: State the prediction target (spatial unit x time bucket, non-
 autoregressive), the feature set, and the train/validation/test split. Justify
-the validation strategy. -->
+the validation strategy. Feature engineering itself is covered in
+@sec-data-prep. -->
 
-## Feature Engineering
-
-<!-- Source notebook: notebooks/3.1 FeatureEngineering.ipynb -->
-<!-- TODO: Spatial (H3 res 7, census tract, community area), temporal
-(hour/day/holiday), POI and weather features; the split
-(data/prediction_split/<spatial>/<temporal>); output
-data/processed/prediction_features.parquet. -->
-
-## Support Vector Machine
+### Support Vector Machine
 
 <!-- Source notebook: notebooks/3.2a PredictionSVM_Standard.ipynb -->
 <!-- TODO: Follow the assignment recipe: linear (no kernel) baseline -> add
@@ -40,7 +88,7 @@ kernels -> GridSearchCV hyperparameters. Report metrics, comment on shortfalls,
 and show performance vs. resolution (res 7 vs census tract vs community area).
 Trained models in models_predictions/SVR/standard/models/. -->
 
-### Shortfalls and Improvement Levers {#sec-svm-shortfalls}
+#### Shortfalls and Improvement Levers {#sec-svm-shortfalls}
 
 <!-- DRAFT bullets for later revisiting -- expand into prose once the final
 tables/figures (tbl-svr-level-comparison, fig-svr-feature-importance) are
@@ -121,12 +169,12 @@ drop_column_ablation.csv). -->
   a nonlinear kernel is needed for this target, not just a step to gradually add
   per the assignment recipe.
 
-## Deep Learning Model
+### Deep Learning Model
 
 <!-- Source notebook: notebooks/3.3 PredictionDeepLearning_Res7.ipynb -->
 <!-- TODO: Feedforward NN architecture, training setup, results per resolution. -->
 
-## Model Comparison
+### Model Comparison
 
 <!-- Source notebook: notebooks/3.4 ModelPerformanceVisualization.ipynb -->
 
@@ -143,3 +191,74 @@ relative error, and the coefficient of determination per hexagon).
 has been executed and saved with the labelled cells' outputs. If a render fails
 on a missing embed, run and save 3.4 first (its SVR bundles come from 3.2a/3.2b).
 -->
+
+## Smart Charging (Reinforcement Learning) {#sec-rl}
+
+<!-- ASSIGNMENT Task 4 — Smart Charging Using Reinforcement Learning:
+An electric taxi driver charges at home. The vehicle arrives at 2 p.m. and leaves
+at 4 p.m. daily. Design an automated charging agent that:
+- adjusts charging power every 15 minutes, bounded between 0 kW and a max (e.g. 22 kW);
+- must not exceed the battery capacity;
+- faces a STOCHASTIC energy demand at departure ~ Normal (e.g. mu = 30, sigma = 5 kWh),
+  realised exactly when the driver leaves;
+- goal: avoid running out of energy (very HIGH penalty) AND minimise recharging cost;
+- recharging cost is exponential in power: cost(t,p) = sum over t of alpha_t * e^p.
+Deliverables: build the environment as a discrete-event simulation, define the MDP
+(states, actions, reward), and solve with an RL algorithm (e.g. DQN); discrete
+actions (zero/low/medium/high) are allowed. -->
+
+<!-- STATUS: notebook 4.1 ReinforcementLearning.ipynb implements this task as a
+tabular Q-learning MVP. It is WIP — several cells carry TODOs (describe the Env /
+Agent / Training, vary alpha_t over time, add stronger baselines, multi-seed
+robustness, and a DQN agent for comparison). Fill those in as the notebook matures. -->
+
+We frame the taxi driver's home charging as a Markov Decision Process and solve it
+with Q-learning. The agent sets the charging power in 15-minute steps between the
+2 p.m. arrival and 4 p.m. departure, trading off recharging cost against the risk
+of not meeting the (stochastic) energy demand for the working day.
+
+### Problem Formulation (MDP)
+
+<!-- Source notebook: notebooks/4.1 ReinforcementLearning.ipynb (cell "MDP Formulation") -->
+<!-- TODO: Present the MDP as implemented:
+- State S = (b_t, t): battery level b_t in [0, 50] kWh, timestep t in {0..8}
+  (t=0 is 14:00, t=8 is 16:00).
+- Actions A = {0, 7.33, 14.67, 22} kW (zero / low / medium / high).
+- Transition: deterministic charging for t<8, i.e. b_{t+1} = min(b_t + a*0.25, 50);
+  at t=8 the demand D ~ N(mu=30, sigma=5) kWh is revealed.
+- Reward: negative recharging cost, plus a large penalty if the battery cannot
+  cover D at departure. State the cost coefficient alpha_t (currently a constant
+  0.0883 $/kWh, calibrated to EIA Illinois retail electricity price). -->
+
+### Environment (Discrete-Event Simulation)
+
+<!-- TODO: Describe the SmartChargingEnv class — capacity 50 kWh, max power 22 kW,
+8 fifteen-minute steps, the reset/step interface and how the reward is returned. -->
+
+### Q-Learning Agent
+
+<!-- TODO: Describe the tabular QLearningAgent — Q-table over (step, battery)
+states, epsilon-greedy action selection, and the Q-learning update. Report the
+hyperparameters (LR = 0.1, gamma = 1, epsilon = 0.1) and justify them. -->
+
+### Training
+
+<!-- TODO: Training loop over 5000 episodes; discuss convergence and how the
+episode count was chosen. -->
+
+### Learned Policy
+
+The heatmap below shows the learned charging policy: for each battery level and
+timestep, the charging action the agent has learned to take.
+
+{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#fig-policy-heatmap" >}}
+
+<!-- TODO: Interpret the policy — when and how aggressively the agent charges as a
+function of remaining time and current battery level. -->
+
+### Evaluation
+
+<!-- TODO: Report the evaluation over ~1000 simulated days (failure rate and
+average charging cost) against the naive baseline. Discuss the cost vs.
+reliability trade-off. Extend with stronger baselines, multi-seed robustness, and
+a DQN comparison as noted in the notebook TODOs. -->
