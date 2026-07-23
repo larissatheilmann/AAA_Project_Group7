@@ -92,9 +92,11 @@ Trained models in models_predictions/SVR/standard/models/. -->
 
 <!-- DRAFT bullets for later revisiting -- expand into prose once the final
 tables/figures (tbl-svr-level-comparison, fig-svr-feature-importance) are
-embedded. Numbers below are from the completed 3.2a run
-(models_predictions/SVR/standard/models/level_comparison.csv, permutation_importance_blocks.csv,
-drop_column_ablation.csv). -->
+embedded. Numbers below are from the completed 3.2a run (level comparison, permutation
+importance, and drop-column ablation are computed as in-memory DataFrames in that notebook,
+not persisted to CSV -- see the tbl-svr-level-comparison / fig-svr-feature-importance cells
+directly, or models_predictions/SVR/standard/models/level_comparison.csv, the one comparison
+table still written to disk since 3.2b reads it back in for its direct-vs-residual section). -->
 
 - **The SVR barely beats, and at one of six granularities loses to, a
   historical-mean ("climatology") baseline.** Skill score
