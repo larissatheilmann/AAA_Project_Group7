@@ -12,7 +12,8 @@
 
 This section describes the preparation pipeline that turns the raw sources
 described in @sec-data into the analysis-ready datasets used throughout the
-report.
+report. A detailed table of the engineered features can be seen at 
+@tbl-engineered-features in the appendix.
 
 ## Taxi Trip Description and Cleaning
 
@@ -60,6 +61,21 @@ both spanning January 1, 2024 through May 12, 2026.
 <!-- Source notebook: notebooks/1.2 WeatherDataPrep.ipynb -->
 <!-- TODO: Retrieval and processing; justify chosen temporal resolution and its
 possible impact on predictive power. Output data/weather_data.parquet. -->
+
+The final dataset comprises 17,544 hourly observations across nine columns (a timestamp,
+six raw variables (@tbl-meteo-var), and two engineered wind variables) with no missing values, consistent 
+with the reanalysis nature of the data. A small number of precipitation and snow cover 
+values were marginally negative due to rounding errors in the underlying computations 
+and were clipped to zero; temperature and precipitation were additionally converted to 
+Celsius and millimeters for interpretability. Exploratory analysis confirms clear seasonal 
+patterns, with snow cover and snow depth peaking between November and March/April and 
+falling to near zero in summer. Snow cover approaches 100% precisely when snow depth 
+peaks and temperatures are lowest, confirming internal consistency, while precipitation 
+shows no strong correlation with snow variables, as expected given their distinct physical 
+origins. No anomalies or implausible extremes were found. The temperature ranges from below 
+−30°C to roughly 35°C, precipitation stays below ~20 mm/hour, and snow depth does not exceed 
+30 cm which is consistent with Chicago's historical climate. For the client, this means the 
+weather inputs for our models are trustworthy and reliable to use.
 
 ## Points of Interest
 

@@ -34,10 +34,10 @@ Chicago (latitude 42, longitude -87.8) rather than a network of ground
 stations. The record runs from January 1, 2024 through May 12, 2026 at hourly
 resolution and carries six variables: 2-metre air temperature, total
 precipitation, snow cover, snow depth, and the two horizontal components of
-wind at 10 metres. A reanalysis is a modeled reconstruction rather than a
-direct station reading, but it gives complete, gap-free hourly coverage for
-the entire trip period, which no single Chicago weather station could
-promise.
+wind at 10 metres. A reanalysis combines numerical weather prediction models 
+with observational data through data assimilation, resulting in a temporally 
+continuous representation of atmospheric conditions, which no single Chicago 
+weather station could promise.
 
 Points of interest come from OpenStreetMap, extracted with OSMnx for the
 "Chicago, Illinois, USA" boundary and limited to three tag families: amenity,

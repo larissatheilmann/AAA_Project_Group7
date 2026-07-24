@@ -10,6 +10,8 @@ in the main body of the report, organized by the notebook that produces them
 
 ## Weather Data Preparation (1.2)
 
+{{< embed "notebooks/1.2 WeatherDataPrep.ipynb#tbl-meteo-var" >}}
+
 *No additional labeled figures or tables from this notebook.*
 
 ## Points of Interest Data Preparation (1.3)
@@ -134,5 +136,23 @@ the other three add the POI and weather blocks to it.
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-segments-relerr" >}}
 
 ## Reinforcement Learning (4.1)
+
+![Figure 1a: Training score over time.](../plots/learning_curve.png){#fig-learning_curve}
+
+![Figure 1b. Probability of running out of energy over time.](../plots/failure_rate_curve.png){#fig-failure_rate_curve}
+
+![Figure 2. Learned charging policy. The color indicates the chosen charging speed for each battery-level/time combination.](../plots/policy_heatmap_verified.png){#fig-policy_heatmap_verified}
+
+{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#tbl-naive-qtabular" >}}
+
+![Figure 3a. DQN training score.](../plots/learning_curve_dqn.png){#fig-learning_curve_dqn}
+
+![Figure 3b. DQN failure rate during training.](../plots/failure_curve_dqn.png){#fig-failure_curve_dqn}
+
+![Figure 4. Best DQN policy found across the five training runs. The Q-table stores entries only for states that were actually visited during training (visit_counts > 0) and thus, combinations of time step and battery level that were never reached remain empty. The DQN network, by contrast, is a continuous function that produces an output for any given input. This includes states that never occurred during training (e.g. battery=60 at t=0). Thereby, both plots differ in terms of their appearance.](../plots/dqn_policy_heatmap.png){#fig-dqn_policy_heatmap}
+
+{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#tbl-dqn-summary" >}}
+
+{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#tbl-dqn-breakdown" >}}
 
 *No additional labeled figures or tables from this notebook.*

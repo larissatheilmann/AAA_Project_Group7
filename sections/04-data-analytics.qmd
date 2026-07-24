@@ -341,12 +341,25 @@ tabular Q-learning MVP. It is WIP — several cells carry TODOs (describe the En
 Agent / Training, vary alpha_t over time, add stronger baselines, multi-seed
 robustness, and a DQN agent for comparison). Fill those in as the notebook matures. -->
 
-We frame the taxi driver's home charging as a Markov Decision Process and solve it
-with Q-learning. The agent sets the charging power in 15-minute steps between the
-2 p.m. arrival and 4 p.m. departure, trading off recharging cost against the risk
-of not meeting the (stochastic) energy demand for the working day.
+### 4.3 Smart Charging (Reinforcement Learning)
 
-### Problem Formulation (MDP)
+#### Executive Summary
+An automated charging controller was designed and evaluated for the client's ride-hailing EV fleet, comparing two reinforcement learning methods: Tabular Q-Learning and a Deep Q-Network (DQN). Across five independent training runs, Tabular Q-Learning reduced the average daily charging cost by roughly 22% relative to a naive always-full-power baseline, with the probability of running out of energy remaining close to that baseline. DQN achieved comparable average performance with fewer training episodes but showed substantially higher variability across runs and is not recommended for deployment at this stage. The DQN approach may become more relevant as for example the state complexity increases greatly.
+
+#### Problem Framing & Methodology
+Each vehicle returns home at 2:00 PM and must depart at 4:00 PM. During this window, an automated controller decides every 15 minutes how fast to charge the battery, choosing from four charging speeds. Electricity prices rise later in the afternoon, while the energy required for the day's shift is unknown until departure and varies around 30 kWh. Running out of energy mid-shift causes a missed fare and a stranded vehicle is substantially more costly than a marginally higher electricity bill. Thus, the controller must balance cost against this risk.
+The problem was formalized as a Markov Decision Process (MDP). At each step, the model observes battery level and remaining time, and selects one of four charging speeds (0, 7.33, 14.67, or 22 kW). Each decision incurs a small electricity cost, and a $500 penalty applies if the battery is insufficient at departure. This penalty was set far above the maximum achievable savings from smart charging (at most a few cents per day) so that the model always prioritizes reliability. The arrival battery level is drawn from a uniform distribution (0–50% of capacity) rather than assumed as always empty, reflecting realistic driver behavior and creating a genuine cost-risk trade-off. The per-kWh price coefficient rises from ~7 to ~11 cents across the eight time steps, incentivizing earlier charging where safe.
+Two methods were compared: Tabular Q-Learning, a lookup table well suited to this problem's small, enumerable state space, and DQN, which replaces the table with a neural network capable of generalizing across states. Each method was trained independently five times with different random seeds and evaluated on several thousand simulated days per run, to avoid drawing conclusions from a single, potentially lucky training outcome. 
+
+#### Results
+##### Tabular Q-Learning
+Training over 150,000 simulated days shows the training score improving and then stabilizing, with the failure rate dropping sharply to a low, stable level (@fig-learning_curve, @fig-failure_rate_curve), indicating convergence to a consistent policy. The learned policy (@fig-policy_heatmap_verified) uses both intermediate charging speeds across a substantial share of states rather than only the extremes, indicating a genuinely differentiated strategy.
+Tabular Q-Learning reduced the average daily cost from $1.92 to $1.50 ± $0.02 while keeping the failure probability (0.11% ± 0.09%) close to the naive baseline (@tbl-naive-qtabular). Overall, a roughly 22% cost reduction without a measurable increase in stranded-vehicle risk.
+
+##### Deep Q-Network
+DQN's training curves (@fig-learning_curve_dqn, @fig-failure_curve_dqn) oscillate throughout the full 20,000-episode period rather than stabilizing, so the best-performing weights observed at any point were retained rather than the final ones. Increasing episodes further did not help, which is also why DQN required far fewer episodes than the tabular approach (20,000 vs. 150,000), reducing the compute time needed drastically.
+The retained policy (@fig-dqn_policy_heatmap) charges at full power in almost all states, differing from the naive baseline in only two narrow state regions. Largely reproducing the naive strategy rather than a materially different one. The DQN heatmap appears fully populated while the Q-table heatmap only covers a diagonal band, because the Q-table stores entries only for visited states, whereas the neural network returns an output for any input, including states never encountered during training.
+DQN reduced the average daily cost to $1.46 ± $0.24 with a failure probability of 1.16% ± 0.96% which is comparable on average to Tabular Q-Learning, but with much greater variability across runs (@tbl-dqn-summary). The per-seed variation is one of the key findings: one run reproduced the naive strategy almost exactly, while the other four achieved lower costs at markedly higher failure rates (@tbl-dqn-breakdown). This inconsistency, more than the average result, is why DQN is not recommended for production use at this stage, as we are able to achieve comparable or even better results with noticeably less effort.
 
 <!-- Source notebook: notebooks/4.1 ReinforcementLearning.ipynb (cell "MDP Formulation") -->
 <!-- TODO: Present the MDP as implemented:

@@ -15,6 +15,20 @@ Keep the framing consultative and non-technical; state the "so what?" clearly. -
 <!-- TODO: Translate findings into actionable advice for the fleet operator.
 Include a clear recommendation on private vs. public charging infrastructure. -->
 
+Across both reinforcement learning approaches, Tabular Q-Learning proved the more suitable
+method for the client's charging problem: it converged reliably across all training runs, 
+reduced the average daily charging cost by roughly 22% relative to the naive baseline,
+and kept the probability of running out of energy close to that baseline. This directly 
+supports the client's goal of operating a dependable ride-hailing service without compromising 
+vehicle availability. Deep Q-Network achieved a comparable average cost and failure rate, but 
+its substantially higher variability across runs makes it a less predictable basis for a 
+service where a single stranded vehicle translates into a missed fare and reputational cost 
+for the platform. Based on these results, Tabular Q-Learning is recommended for the initial 
+fleet rollout, offering the client a solution that is both cost-effective and lightweight to 
+maintain in production. As the client's fleet grows or charging decisions are greatly extended, 
+DQN may become more relevant, positioning it as a natural next step for later stages of the 
+platform's expansion rather than for the current use case.
+
 ## Limitations & Future Work
 
 <!-- TODO: Data, modelling and methodological limitations. -->
