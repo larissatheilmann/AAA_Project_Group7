@@ -33,12 +33,6 @@ Persistent demand hot spots were identified using Gaussian Mixture Models (GMM) 
 The probabilistic clustering produced by the GMM groups regions with similar spatial demand characteristics, while KDE provides a continuous representation of demand intensity. Both methods highlight areas associated with dense commercial activity, transportation infrastructure and entertainment facilities, demonstrating the strong influence of land use on taxi demand.
 The complementary KDE visualisation is presented in **Appendix A**.
 
-
-### Weather Effects
-
-<!-- Source notebook: notebooks/descriptive_analytics_weather.ipynb -->
-<!-- TODO: Relationship between weather conditions and demand. -->
-
 ## Predictive Analytics (SVM & Neural Networks) {#sec-prediction}
 
 <!-- ASSIGNMENT Task 3 — Predictive Analytics (a) SVM and (b) Neural Networks:
