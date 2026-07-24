@@ -42,6 +42,10 @@ in the main body of the report, organized by the notebook that produces them
 
 *No additional labeled figures or tables from this notebook.*
 
+## Feature Engineering (3.1)
+
+{{< embed "notebooks/3.1 FeatureEngineering.ipynb#tbl-engineered-features" >}}
+
 ## SVR Hyperparameter Search Grid (3.2)
 
 Both SVR notebooks share the identical two-stage search defined in
