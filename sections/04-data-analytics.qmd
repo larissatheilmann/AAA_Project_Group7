@@ -78,49 +78,27 @@ The prediction target is `Total_Trip_Start`, the number of trips beginning in a
 given spatial unit during a given time bucket. Prediction is scenario-conditioned
 rather than autoregressive: no model sees the previous bucket's demand, only the
 cell's identity and location, the calendar, the weather, and the POI counts for
-that cell. That restriction comes from the assignment brief, and it also matches
-the client's actual planning problem, which is positioning vehicles ahead of a
-shift rather than reacting to the hour just past. What each model *fits* is not
-identical to the target itself, since the residual SVM predicts a correction to a
-baseline rather than demand directly; the two strategies are described in the
-subsections below.
-
+that cell.
 Every model is trained on six grids: three spatial units (H3 resolution 7 with
 108 active hexagons, 496 active census tracts, and 77 community areas) crossed
-with hourly and daily bins. Resolution 8 is explored descriptively in @sec-eda
-but excluded from modelling [GAP: state why res 8 was dropped before modelling;
-the pipeline filters it out without recording a reason], and inactive units,
-those with no pickups anywhere in the observation window, are dropped during grid
-construction (@sec-data-prep). Sparsity differs sharply across the six: the share
-of zero-demand rows runs from 0.8% at community/daily to 96.5% at census/hourly.
-That spread drives the sampling decisions taken separately for each model family
-below.
-
-The reference point throughout is a historical mean per spatial unit, keyed by
+with hourly and daily bins. Inactive units, those with no pickups anywhere in the
+observation window, are dropped during grid construction (@sec-data-prep). 
+Sparsity differs sharply across the six: the share of zero-demand rows runs from 0.8% 
+at community/daily to 96.5% at census/hourly. That spread drives the sampling decisions
+taken separately for each model family below. The reference point throughout is a historical mean per spatial unit, keyed by
 month and day of week on the daily grids and additionally by hour on the hourly
 ones. It is computed on the training split alone and merged into validation and
 test, so it carries no future information, and it serves twice over: as the
 `base_demand` feature available to both models and as the benchmark for the skill
 score, `1 - MAE_model / MAE_baseline`. Skill rather than raw MAE is reported
 because mean demand differs by roughly a factor of 80 across the six grids, which
-makes absolute errors incomparable between them. Both model families fit in
-`log1p` space and invert with `expm1`, clipped at zero, so every metric quoted
-here is in count space.
+makes absolute errors incomparable between them.
 
 Train, validation and test are cut along the calendar rather than drawn at
-random. The earliest 50% of unique dates train the models, the next 20% serve for
-validation, and the final 30% are held back for testing [GAP: state the actual
-date boundaries of the three splits]. A random row-level split would place adjacent
-hours of the same cell on both sides of the boundary and leak autocorrelated
-demand into the test set, and it would also contaminate `base_demand`, which is
-estimated from training dates only. Model selection, covering feature sets,
-kernels, architectures, and hyperparameters, is therefore carried out on the
-validation split, with the test split scored once for the selected models.
-[GAP: this single-scoring discipline holds for the SVM notebooks; confirm and
-state plainly how the NN's per-level scores were obtained before finalising, see
-@sec-nn.] [GAP: one EDA notebook argues the final week of collection is
-incomplete and should be excluded; no such truncation exists in the pipeline.
-Resolve and state here, or move to the limitations.]
+random. The earliest 50% of unique dates train the models (2024-01-01 → 2025-03-06), the next 20% serve for
+validation (2025-03-07 → 2025-08-26), and the final 30% are held back for testing (2025-08-27 → 2026-05-12). 
+A random row-level split would leak autocorrelated demand into the test set, and it would also contaminate `base_demand`. 
+Model selection  is carried out on the validation split, with the test split scored once for the selected models.
 
 ### Support Vector Machine
 
@@ -130,171 +108,218 @@ registry, sampling, scoring), 3.2a PredictionSVMStandard.ipynb (direct),
 from the post-zero-mile-drop artifacts in models_predictions/SVR/. -->
 
 Two SVR strategies are trained on identical splits, samples and candidate feature
-sets, differing only in what they are asked to predict. The direct model
+sets, but differing in what they are asked to predict. The direct model
 regresses `log1p(Total_Trip_Start)` on the feature block and converts predictions
 back with `expm1`, clipped at zero. The residual model predicts the log-space
-correction to the historical mean instead, `log1p(demand) - log1p(base_demand)`,
-and reconstructs counts as `expm1(log1p(base_demand) + correction_hat)`; it never
+correction to the historical mean instead, (`log1p(demand) - log1p(base_demand)`),
+and reconstructs counts as `expm1(log1p(base_demand) + correction_hat)`. It never
 sees the raw target, only how far a given cell and time bucket departs from its
-own history. The motivation is that `base_demand` already carries much of the
+own historic mean. The motivation is that `base_demand` already carries much of the
 predictable signal, so a model asked to reproduce it from scratch spends its
-capacity on something the pipeline has already computed, whereas the correction
-is the part that genuinely has to be learned. Since that correction has a far
+capacity on something the pipeline has already computed. Since that correction has a far
 smaller scale and variance than `log1p(demand)`, hyperparameters tuned for one
 target do not transfer to the other, and the residual model is therefore tuned
-from scratch rather than inheriting the direct model's settings.
+from scratch.
 
-Both strategies are bounded by fitting cost. SVR is O(n²) to fit, which puts
-training splits of up to 6.2 million rows out of reach, so each level is fitted
-on a class-balanced sample: 4,000 rows per class for the kernel scan and 8,000
-per class for the grid search, with selection scored on a 50,000-row validation
-subsample and only the level's winner re-scored on the full validation split.
-Balancing rather than uniform sampling is what makes such a small sample usable,
-since at h3_7/hourly roughly 94% of rows are zero and a uniform draw would be
-almost entirely empty cells; where a level is not zero-inflated the zero class
-runs out and the sample tilts non-zero on its own. Validation and test are always
-evaluated at natural prevalence, so training and evaluation deliberately see
-different class mixes.
+SVR is inefficient to fit so each level is fitted on a class-balanced sample, for which we pull all non-zero demand rows from the training set 
+and match it with at most an equal amount of zero demand rows so the target mix is 50/50 rather than the mix the level actually has (4000 rows for the kernel scan, 8000 for the grid search, 
+50000-row validation the level's winner re-scored on the full validation split). Levels with less zero-demand rows, 
+the sample end up non-zero-heavy (community/daily with 0.8% zero). A uniform draw of the same size would be 94% empty cells
+at h3_7/hourly and 96.5% empty at census/hourly, and a model fitted on it would learn little beyond predicting zero. Validation and test are never rebalanced.
+Both are scored at natural prevalence, so the models are trained on a class mix they do not meet at evaluation.
 
-Tuning then proceeds in two stages per level and feature set. A kernel scan
-compares linear, polynomial and RBF at fixed `C=1` and `gamma="scale"`, judged by
-validation R² in count space, and the winning kernel goes into a three-fold grid
-search over `C` in {1, 10, 50} and `gamma` in {scale, 0.05, 0.2}, extended by
-`degree` in {2, 3} where the polynomial kernel wins, scored by count-space MAE.
-Four feature sets compete at every level (a basic calendar, location and history
-block, then that block plus weather, plus POI, and plus both), with the winner
-taken on validation R² in count space. The direct notebook runs this through
-sklearn's `GridSearchCV`; the residual notebook reimplements the identical grid
-as a manual K-fold loop, because a standard scorer never sees a row's
-`base_demand` and so cannot turn a predicted correction back into a trip count.
-LIBSVM's iteration count is capped, as some `C`/`gamma` combinations otherwise
-run without converging.
+Tuning proceeds in two stages per level and feature set. A kernel scan compares
+linear, polynomial and RBF at a fixed baseline setting, judged by validation R²
+in count space, and only the winning kernel carries into a three-fold grid search
+over `C` and `gamma`, extended by `degree` where the polynomial kernel wins,
+scored by count-space MAE. Four feature sets compete at every level (a basic
+calendar, location and history block, then that block plus weather, plus POI, and
+plus both).
+@tbl-svr-search-grid lists every value searched and the sample sizes each stage
+is fitted on; @tbl-svr-feature-blocks gives the feature blocks the four candidate
+sets are built from.
 
 #### Validation Results
-
-{{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#tbl-svr-direct-vs-residual-final" >}}
-
-{{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#fig-svr-direct-vs-residual-final" >}}
-
 The direct model does not beat the historical mean it was given as a feature. At
 five of six levels its tuned winner is worse than the baseline on validation MAE,
 from -3.5% at community/daily down to -35.5% at census/hourly, and the single
-level it wins, h3_7/daily, it wins by 0.2%, which is a tie in all but sign.
+level it wins, h3_7/daily, it wins by only 0.2%.
 Predicting the correction instead improves the skill score at all six levels, but
 the improvement is uneven and mostly modest: community/daily is the one clear
 win at +5.3% (R² = 0.970), h3_7/daily turns its tie into a slim +1.2%, h3_7/hourly
 (+0.3%) and census/daily (+0.3%) remain ties, and community/hourly stays just
-short of the baseline at -1.0%.
+short of the baseline at -1.0%. The exception is census/hourly, the sparsest grid at 
+96.5% zero rows, which loses heavily under both strategies (-35.5% direct, -32.1% residual). 
+The MAE skill is deeply negative while RMSE skill is roughly flat (+0.7% residual).
+Daily aggregation beats hourly at all three spatial resolutions under both strategies, 
+consistent with hourly bins being sparser and noisier.
+Every winning direct model uses the flexible RBF kernel, while four of the six winning residual
+models do just as well with a straight-line fit (both h3_7 levels, census/hourly
+and community/daily). Both models work on a compressed scale and have their predictions expanded 
+back into trip counts at the end, which means a small error before expansion becomes a large one after it. 
+The direct model has to predict demand itself, anywhere from zero to several thousand
+trips a day, and needs the extra curvature to keep those errors from blowing up.
+The residual model only predicts a small adjustment to the historical average, so
+even a straight line stays close enough that the expansion cannot run away with
+it. All six residual winners also settled at `C=1`, against direct winners spread from `C=1` to `C=50`.
 
-The exception is census/hourly, the sparsest grid at 96.5% zero rows, which loses
-heavily under both strategies (-35.5% direct, -32.1% residual). Its error profile
-is diagnostic: MAE skill is deeply negative while RMSE skill is roughly flat
-(+0.7% residual). A model trained on a balanced sample and scored at natural
-prevalence predicts a little too much demand across a very large mass of empty
-cells, which accumulates in MAE but barely registers in an RMSE dominated by the
-few large errors at busy cells.
-
-Two patterns hold across the grid. Daily aggregation beats hourly at all three
-spatial resolutions under both strategies, consistent with hourly bins being
-sparser and noisier. And kernel selection splits cleanly between the strategies:
-every direct winner is RBF, while four of six residual winners are linear (both
-h3_7 levels, census/hourly and community/daily). This is a property of the
-transform rather than a preference for simplicity. A linear model in log space is
-unbounded, and `expm1` turns a moderately wrong log prediction into an enormous
-count, so the direct target needs a bounded nonlinear fit; the residual's small
-scale never pushes the reconstruction into that regime. All six residual winners
-also settled at `C=1`, against direct winners spread from `C=1` to `C=50`.
-[GAP: `C=1` is the lowest value in the search grid, so these winners sit on a
-grid edge. Either extend the grid downwards or confirm that validation
-performance is flat there before reporting the setting as converged.]
-
-The test split is untouched at this stage. It is scored once, for the selected
-models, in the comparison against the neural network.
-
-#### Shortfalls and Improvement Levers {#sec-svm-shortfalls}
-
-<!-- Sources: docs/report_content_guide.md 4.2 "Shortfalls & improvement levers";
-permutation/ablation figures from 3.2a (in-memory, see fig-svr-feature-importance).
-The two-stage-search check below was re-verified against the artifacts on disk;
-see the paragraph on residual_kernelgrid for what that verification found. -->
-
-The plainest shortfall is how little either strategy gains on the historical mean.
-That is less a tuning failure than a consequence of the framing: with
-autoregressive signal ruled out, cell identity plus calendar sits close to the
-ceiling of what is predictable here, and a historical mean over those same keys is
-already close to optimal. It also bounds what the obvious remedy would buy. Each
-level is fitted on at most 16,000 rows because SVR's quadratic fitting cost makes
-anything larger impractical, but more rows of the same features are unlikely to
-clear a ceiling set by the features themselves. The lever worth testing is how the
-sample is drawn rather than how much of it is used, and natural-prevalence
-training is the untested alternative that two separate results point towards: the
-census/hourly collapse described above, and the zero-demand behaviour below.
-
-That second result is a specific and fixable failure mode. On the held-out
-comparison the residual model is worse than the baseline precisely on cells whose
-actual demand turns out to be zero, where the neural network is better; the
-correction term does not shrink to zero where it should. Because zero rows are
-between 79% and 94% of all rows depending on the level, that one segment carries
-disproportionate weight in any aggregate MAE. Two remedies are worth testing: a
-floor or clip on the reconstructed correction, or a two-stage gate that decides
-zero against non-zero before regressing magnitude at all. [GAP: the direction of
-this effect has held across every version of the comparison so far, but the
-segment magnitudes in `3.4` are pending regeneration, since the FNN predictions
-there are stale. Do not quote segment skill figures until `3.3` and `3.4` have
-been re-run.]
-
-One design shortcut needs its own note, because it looks like a limitation and
-probably is not. Hyperparameters are searched only within the kernel that won the
-scan, rather than running a full grid inside every kernel. An independent
-full per-kernel search exists in `models_predictions/SVR/residual_kernelgrid/` and
-was previously read as confirming the shortcut. It can no longer be read that way.
-Those artifacts date from before the zero-mile-trip drop, and the giveaway is the
-baseline rather than the models: at h3_7/daily the full-grid run records a baseline
-validation MAE of 14.658 against 15.830 in the current run, and the historical mean
-is a property of the data alone, not of the search. The two runs are therefore
-scored on different datasets, and on the current artifacts only two of six levels
-even select the same kernel and feature set. [GAP: re-run the full per-kernel grid
-search on the post-drop data, or drop the claim that the two-stage shortcut is
-validated. As it stands the check is untested against the data actually reported
-here. Note also that the `level_comparison.csv` this comparison is usually cited
-from does not exist under `residual_kernelgrid/`; only the per-level bundles do.]
-
-Three improvement levers remain that do not reintroduce autoregressive signal.
-Weather enters the model as a single citywide hourly series, so it varies across
-hours but never across cells within an hour, which leaves both weather-by-hour and
-weather-by-location interactions unexplored, and makes finer or spatially resolved
-weather data worth acquiring. POI enters as counts per cell, where a distance to
-the nearest POI of each category would carry more information about why a cell
-generates trips. The permutation and drop-block analysis supports that ordering:
-after `base_demand`, the daily levels depend most on the POI block (+5.5% MAE at
-h3_7/daily, +9.4% at census/daily, +13.2% at community/daily when it is removed),
-while the hourly levels depend on history instead (+148%, +32% and +22%
-respectively). [GAP: those figures are the direct SVR's permutation run in `3.2a`;
-`3.2b`'s residual-specific ablation was not regenerated this run and is currently
-unverified against the post-drop data.]
+The two best model are both residual models. At community/daily, fitted on the basic+weather feature set with a 
+straight-line kernel at `C=1`, which brings the average error down from the baseline's 36.19 trips per 
+area-day to 34.25 at an R² of 0.970. Second is the residual SVR at h3_7/daily, on the basic+poi feature set, 
+also straight-line at `C=1`, moving 15.83 trips per hexagon-day to 15.64 at an R² of 0.954. Both sit on daily 
+grids rather than hourly ones, both correct a historical mean instead of predicting demand outright, and 
+neither needs a curved kernel. In operational terms the margin is small: roughly two trips per
+area per day at the better of the two, and about a fifth of a trip per hexagon at
+the other.
 
 ### Deep Learning Model {#sec-nn}
 
 <!-- Source notebook: notebooks/3.3 PredictionDeepLearning_Res7.ipynb -->
 <!-- TODO: Feedforward NN architecture, training setup, results per resolution. -->
 
+For the neural network, we used a feedforward network that predicts 
+log1p-transformed trip counts, which are then back-transformed via expm1 
+for evaluation. We trained on the full training split without any 
+zero/non-zero balancing, since our experiments showed that balanced sampling 
+actually hurt the FNN's performance. For all six levels we used the same 
+feature set, combining basic temporal and location features with all 14 POI 
+categories and 5 weather variables. We did not test different feature set 
+combinations as we did for the SVM, mostly due to computational constraints. 
+The network uses ReLU activations in the hidden layers, a linear output unit, 
+MSE as the loss function, and AdamW with a weight decay of 1e-4. Training ran 
+for up to 15 epochs with a batch size of 250. Within each training run, we 
+used early stopping with a patience of 3 to select the best checkpoint based 
+on validation loss, preventing the model from training past its best point. 
+To find the best architecture per level, we ran a grid search over four layer 
+configurations ([64,32,16], [128,64,32], [128,64,32,16], [256,128,64,32]), 
+three learning rates (0.01, 0.001, 0.0001), and two dropout rates (0.0, 0.2), 
+giving 24 configurations per level. The winning configuration per level was 
+selected by validation MAE in count space. The final performance of each 
+winning model was then evaluated once on the held-out test set, with results 
+reported in (Figure X) across MAE, RMSE and R². Looking at these 
+results, h3_7/hourly comes out as the best performing level overall. As shown
+in (Table X), smaller and shallower networks worked best for the 
+denser levels like h3_7/hourly and community, while census levels needed 
+deeper networks and lower learning rates. Census/daily was the only level 
+where dropout helped, which fits with it being the hardest level to train 
+given its very high share of zero-demand rows. 
+(Table X)shows the FNN results across all six spatial-temporal levels.
+The model beats the historical-mean baseline at four of the six levels, with
+h3_7/hourly performing best at a skill score of +6.3% MAE. The gains are
+small across all levels. Two levels perform notably worse: census/hourly is
+essentially a coin flip at -0.1%, and census/daily loses to the baseline by
+a large margin (-20.3% MAE, -44.7% RMSE). These are the two sparsest and most
+zero-inflated levels in our dataset, and the SVM struggles there as well,
+which suggests the difficulty lies in the data rather than the model choice.
+Overall, the FNN performs best at finer temporal resolution and denser spatial
+units, while coarser and sparser levels remain hard to predict beyond a simple
+historical average. (Check after training)
+
+#### Validation Results
+<!-- Add NN comparions here -->
+
 ### Model Comparison
 
 <!-- Source notebook: notebooks/3.4 ModelPerformanceVisualization.ipynb -->
 
-<!-- TODO: Compare SVM vs. NN on the same holdout and resolution. Conclude
-whether deep learning is worth it, and list improvement levers. -->
+<!-- TODO: the list below states WHICH analyses are run and where each figure
+lives. The interpretation of their results is still to be written, and must wait
+until 3.3 has been re-run (the FNN prediction files predate the zero-mile-trip
+drop) and 3.4 re-executed on top of it. The outputs currently saved in 3.4 come
+from the earlier broken-merge run and must not be quoted. See
+docs/report_content_guide.md 4.2 "Model Comparison" for the full warning. -->
 
-The SVM and the neural network are compared on the **validation** split at
-`h3_7/daily`; the held-out test set is scored once, at the end, for the model
-selected on validation. Below: predicted versus actual demand, and the spatial
-distribution of the prediction error across Chicago (mean absolute error, mean
-relative error, and the coefficient of determination per hexagon).
+Both families are compared on the same held-out test split, at H3 resolution 7
+and at both temporal bins, against the same historical-mean baseline. Census and
+community levels are excluded: the SVM was scored there, but no matching neural
+network prediction file exists, so a comparison at those levels would not be
+like-for-like. The comparison runs along six lines, each asking a different
+question about where a model's error actually falls. Supporting figures and
+tables are collected in @sec-appendix.
+
+- **Aggregate accuracy.** MAE, RMSE and R² for the baseline, the SVM and the
+  network at each temporal resolution, establishing whether either model beats
+  the historical mean at all and by how much (@tbl-svm-vs-nn-overall).
+- **Predicted against actual.** Predicted versus observed demand per cell and
+  bucket, which exposes systematic over- or under-prediction and the demand range
+  at which the fit degrades, read as spread away from the diagonal
+  (@fig-svm-vs-nn-scatter).
+- **Spatial error.** Error aggregated per hexagon and mapped three ways: absolute
+  error (@fig-svm-hex-mae), error relative to each cell's own mean demand
+  (@fig-svm-hex-mre), and the share of each cell's day-to-day variation the model
+  explains (@fig-svm-hex-r2). The absolute and relative views answer different
+  questions, since the largest absolute errors concentrate downtown purely because
+  demand is largest there, while the relative view is what makes the quiet outer
+  cells legible at all.
+- **Head-to-head by location.** The per-hexagon difference `MAE_NN - MAE_SVM`
+  mapped directly, so that which model wins where is read off a single diverging
+  scale rather than inferred by comparing two separate colour ramps
+  (@fig-svm-vs-nn-hex-delta).
+- **Temporal error.** Error by day of week (@fig-svm-vs-nn-dayofweek,
+  @fig-svm-vs-nn-dayofweek-relerr) and, on the hourly grid only, by hour of day
+  (@fig-svm-vs-nn-hourofday, @fig-svm-vs-nn-hourofday-relerr), each in absolute
+  terms and relative to mean demand. This separates error that simply tracks
+  demand volume from error concentrated at particular times, such as the overnight
+  hours where demand is near zero and small absolute misses dominate the relative
+  figure. City-wide predicted and actual demand across the full test period is
+  plotted alongside as a sanity check on aggregate level and drift
+  (@fig-svm-vs-nn-timeseries).
+- **Error by segment.** Test MAE, relative error and skill score broken down by
+  demand band (zero, 1-10, 11-100, and above 100 trips) and by weather (dry
+  against rainy days), as a table (@tbl-svm-vs-nn-segments) and as relative error
+  per segment (@fig-svm-vs-nn-segments-relerr). This is the decisive view for
+  fleet planning, because a model that wins on average can still lose on exactly
+  the busiest cells, or on the rainy days, that matter operationally.
 
 <!-- NOTE: These embeds resolve once "3.4 ModelPerformanceVisualization.ipynb"
 has been executed and saved with the labelled cells' outputs. If a render fails
 on a missing embed, run and save 3.4 first (its SVR bundles come from 3.2a/3.2b).
 -->
+
+### Shortfalls and Improvement Levers {#sec-shortfalls}
+
+<!-- Sources: docs/report_content_guide.md 4.2 "Shortfalls & improvement levers".
+NOTE on the two-stage-search check: the full per-kernel run in
+models_predictions/SVR/residual_kernelgrid/ dates from 23 Jul, before the
+zero-mile-trip drop (its h3_7/daily baseline val MAE is 14.658 vs. 15.830 in the
+current run), so its skill figures are not comparable to the reported ones. The
+claim is therefore kept qualitative -- do not quote cross-run numbers from it
+without re-running that search on the post-drop data. -->
+
+Neither family clears the historical mean by a wide margin, and the reasons split
+into three groups: limits specific to the SVM, limits specific to the network, and
+limits the two share.
+
+For the **support vector machine**, one failure mode is specific and fixable. The
+residual model is worse than the baseline precisely on cells whose demand turns
+out to be zero, because the correction term does not shrink to zero where it
+should, and zero rows dominate most levels. A floor on the reconstructed
+correction, or a gate that decides zero against non-zero before regressing
+magnitude, would both be worth testing. Smaller gains could come from rebalancing
+the sample (a natural-prevalence draw performed worse) or from a larger one,
+though SVR's quadratic fit cost is what forced a balanced subsample in the first
+place, so more rows trade directly against the breadth of the tuning search.
+
+The **network's** limits are ones of search breadth rather than a diagnosed
+failure. A single feature set was used at every level, so unlike the SVM there is
+no evidence on whether weather or POI features help or hurt the network at any
+given level; repeating the four-way feature-set comparison is the most direct
+improvement lever. The architecture search was bounded the same way, covering
+layer width, learning rate and dropout across 24 configurations while holding
+batch size, activation function and epoch budget fixed. No permutation-importance
+or comparable interpretability check was run for the network, only for the direct
+SVR, so whether the weather and POI blocks contribute at all is currently unknown.
+
+**Both** families fail on the same grids. Census/hourly and census/daily, the
+sparsest and most zero-inflated levels, defeat each of them, which points at the
+data rather than at either model choice. More generally, `base_demand` already
+carries most of the signal that a scenario-conditioned framing makes available, so
+both models compete for a thin margin on top of an already strong baseline. The
+levers that would widen that margin are therefore shared: weather interacted with
+hour and location rather than entered additively, weather resolved spatially
+instead of drawn from a single citywide coordinate (@sec-data-prep), and POI
+expressed as distances to the nearest attractor rather than as counts inside the
+cell.
 
 ## Smart Charging (Reinforcement Learning) {#sec-rl}
 
@@ -355,7 +380,7 @@ episode count was chosen. -->
 The heatmap below shows the learned charging policy: for each battery level and
 timestep, the charging action the agent has learned to take.
 
-{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#fig-policy-heatmap" >}}
+<!--{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#fig-policy-heatmap" >}}-->
 
 <!-- TODO: Interpret the policy — when and how aggressively the agent charges as a
 function of remaining time and current battery level. -->

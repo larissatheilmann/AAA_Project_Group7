@@ -1,0 +1,138 @@
+# Additional Figures and Tables {#sec-appendix}
+
+This appendix collects supporting figures and tables that are not reproduced
+in the main body of the report, organized by the notebook that produces them
+(see the pipeline overview in the project `CLAUDE.md`).
+
+## Taxi Data Preparation (1.1)
+
+*No additional labeled figures or tables from this notebook.*
+
+## Weather Data Preparation (1.2)
+
+*No additional labeled figures or tables from this notebook.*
+
+## Points of Interest Data Preparation (1.3)
+
+{{< embed "notebooks/1.3 POIDataPrep.ipynb#fig-poi-top-types-raw" >}}
+
+{{< embed "notebooks/1.3 POIDataPrep.ipynb#fig-poi-top-types-categorized" >}}
+
+{{< embed "notebooks/1.3 POIDataPrep.ipynb#fig-poi-hex-count" >}}
+
+{{< embed "notebooks/1.3 POIDataPrep.ipynb#fig-poi-hex-category" >}}
+
+{{< embed "notebooks/1.3 POIDataPrep.ipynb#fig-poi-category-corr" >}}
+
+## Temporal-Spatial Discretization (1.4)
+
+*No additional labeled figures or tables from this notebook.*
+
+## Descriptive Analysis: Spatial (2.1)
+
+*No additional labeled figures or tables from this notebook.*
+
+## Descriptive Analysis: Temporal (2.2)
+
+*No additional labeled figures or tables from this notebook.*
+
+## Descriptive Analytics: Weather (2.4)
+
+*No additional labeled figures or tables from this notebook.*
+
+## SVR Hyperparameter Search Grid (3.2)
+
+Both SVR notebooks share the identical two-stage search defined in
+`3.2 PredictionCommonGround.ipynb`, so the direct and residual results stay
+directly comparable. The grid search runs only for the kernel that wins the
+scan, not for all three.
+
+| Stage | Setting | Values searched |
+|-------|---------|-----------------|
+| Kernel scan | Kernels | `linear`, `poly`, `rbf` |
+| | Held fixed during the scan | `C = 1`, `gamma = "scale"` |
+| | Selection criterion | Validation R² in count space |
+| | Training sample | 4,000 rows per class (8,000 total) |
+| Grid search | `C` | 1, 10, 50 |
+| | `gamma` | `"scale"`, 0.05, 0.2 |
+| | `degree` (polynomial kernel only) | 2, 3 |
+| | Cross-validation | 3-fold |
+| | Selection criterion | Count-space MAE |
+| | Training sample | 8,000 rows per class (16,000 total) |
+| Feature sets | Candidates | `basic`, `basic+poi`, `basic+weather`, `basic+poi+weather` |
+| | Selection criterion | Validation R² in count space |
+| Scoring | Validation subsample | 50,000 rows; the level's winner is re-scored on the full validation split |
+
+: Two-stage SVR hyperparameter search grid, shared by the direct (`3.2a`) and residual (`3.2b`) models. {#tbl-svr-search-grid}
+
+The four candidate feature sets are built from the same blocks at every level.
+`basic` is hour (hourly grids only) plus calendar, location and history;
+the other three add the POI and weather blocks to it.
+
+| Block | Features | Count |
+|-------|----------|------:|
+| Hour (hourly grids only) | `hour_sin`, `hour_cos` | 2 |
+| Calendar | `month_sin`, `month_cos`, `is_weekend`, `is_holiday`, `is_near_holiday`, `day_of_week` | 6 |
+| Location | `lat`, `lon`, `distance_to_loop` | 3 |
+| History | `base_demand` | 1 |
+| POI | 14 `poi_cat_*` category counts | 14 |
+| Weather | `2m_temp_c`, `total_precip_mm`, `snow_cov`, `snow_depth`, `wind_speed` | 5 |
+
+: Feature blocks composing the four candidate sets. Resulting widths are 10 / 24 / 15 / 29 features on daily grids and 12 / 26 / 17 / 31 on hourly grids, for `basic` / `basic+poi` / `basic+weather` / `basic+poi+weather` respectively. {#tbl-svr-feature-blocks}
+
+## SVR: Direct Model (3.2a)
+
+<!-- {{< embed "notebooks/3.2a PredictionSVMStandard.ipynb#tbl-svr-val-metrics" >}} -->
+
+{{< embed "notebooks/3.2a PredictionSVMStandard.ipynb#tbl-svr-level-comparison" >}}
+
+{{< embed "notebooks/3.2a PredictionSVMStandard.ipynb#fig-svr-skill-by-level" >}}
+
+{{< embed "notebooks/3.2a PredictionSVMStandard.ipynb#fig-svr-feature-importance" >}}
+
+## SVR: Residual-on-Baseline Model (3.2b)
+<!-- {{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#tbl-svr-residual2-val-metrics" >}} -->
+
+{{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#tbl-svr-residual2-level-comparison" >}}
+
+{{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#fig-svr-residual2-skill-by-level" >}}
+
+{{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#tbl-svr-direct-vs-residual-final" >}}
+
+{{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#fig-svr-direct-vs-residual-final" >}}
+
+## Deep Learning Prediction (3.3)
+
+*No additional labeled figures or tables from this notebook.*
+
+## SVM vs. Neural Network Performance Comparison (3.4)
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#tbl-svm-vs-nn-overall" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-scatter" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-mae" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-mre" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-r2" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-hex-delta" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-dayofweek" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-dayofweek-relerr" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-hourofday" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-hourofday-relerr" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-timeseries" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#tbl-svm-vs-nn-segments" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-segments-relerr" >}}
+
+## Reinforcement Learning (4.1)
+
+*No additional labeled figures or tables from this notebook.*

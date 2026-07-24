@@ -33,6 +33,10 @@ date: 2026-04-01 # Date of submission
 
 {{< include sections/05-conclusion.qmd >}}
 
+\appendix
+
+{{< include sections/06-appendix.qmd >}}
+
 # References {.unnumbered}
 ::: {#refs}
 :::
