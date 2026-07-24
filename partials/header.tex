@@ -5,6 +5,22 @@
 % Multi-row table cells (used by embedded pandas/great-tables output)
 \usepackage{multirow}
 
+% Keep wide auto-generated tables (embedded pandas DataFrames) within the text
+% margin: tighter inter-column padding plus a slightly smaller font inside every
+% table environment. Text-heavy tables that carry explicit column widths still
+% wrap normally; this only reclaims horizontal space for the many-column numeric
+% tables so their content no longer spills past the right margin.
+\usepackage{etoolbox}
+% Tighter inter-column padding for every table so wide multi-column tables use
+% less horizontal space. Individual very wide tables additionally set a smaller
+% font locally (see the appendix), which is why no global table font is forced
+% here: a \BeforeBeginEnvironment font would override those per-table settings.
+\setlength{\tabcolsep}{4pt}
+\BeforeBeginEnvironment{tabular}{\small}
+% Allow long monospace tokens (e.g. notebook filenames) to break across lines
+% instead of protruding into the margin.
+\usepackage[htt]{hyphenat}
+
 % Section titles formatting
 \usepackage{titlesec}
 \titleformat{\section}

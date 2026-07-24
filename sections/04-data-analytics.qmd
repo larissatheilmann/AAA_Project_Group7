@@ -273,40 +273,32 @@ current run), so its skill figures are not comparable to the reported ones. The
 claim is therefore kept qualitative -- do not quote cross-run numbers from it
 without re-running that search on the post-drop data. -->
 
-Neither family clears the historical mean by a wide margin, and the reasons split
-into three groups: limits specific to the SVM, limits specific to the network, and
-limits the two share.
-
-For the support vector machine, one failure mode is specific and fixable. The
-residual model is worse than the baseline precisely on cells whose demand turns
-out to be zero, because the correction term does not shrink to zero where it
-should, and zero rows dominate most levels. A floor on the reconstructed
-correction, or a gate that decides zero against non-zero before regressing
-magnitude, would both be worth testing. Smaller gains could come from rebalancing
-the sample (a natural-prevalence draw performed worse) or from a larger one,
-though SVR's quadratic fit cost is what forced a balanced subsample in the first
-place, so more rows trade directly against the breadth of the tuning search.
-
-The **network's** limits are ones of search breadth rather than a diagnosed
-failure. A single feature set was used at every level, so unlike the SVM there is
-no evidence on whether weather or POI features help or hurt the network at any
-given level; repeating the four-way feature-set comparison is the most direct
-improvement lever. The architecture search was bounded the same way, covering
-layer width, learning rate and dropout across 24 configurations while holding
-batch size, activation function and epoch budget fixed. No permutation-importance
-or comparable interpretability check was run for the network, only for the direct
-SVR, so whether the weather and POI blocks contribute at all is currently unknown.
-
-**Both** families fail on the same grids. Census/hourly and census/daily, the
-sparsest and most zero-inflated levels, defeat each of them, which points at the
-data rather than at either model choice. More generally, `base_demand` already
-carries most of the signal that a scenario-conditioned framing makes available, so
-both models compete for a thin margin on top of an already strong baseline. The
-levers that would widen that margin are therefore shared: weather interacted with
-hour and location rather than entered additively, weather resolved spatially
-instead of drawn from a single citywide coordinate (@sec-data-prep), and POI
-expressed as distances to the nearest attractor rather than as counts inside the
-cell.
+Neither family clears the historical mean by a wide margin; the limits split
+into three groups: SVM-specific, network-specific, and shared.
+For the SVM, one failure mode is specific and fixable: the residual model
+underperforms the baseline on true-zero-demand cells, since the correction term
+does not shrink to zero where it should, and these rows dominate most levels. A
+floor on the reconstructed correction, or a zero/non-zero gate before regressing
+magnitude, would both be worth testing. Smaller gains could come from a
+different sample balance, since a natural-prevalence draw performed worse, or a
+larger sample, though SVR's quadratic fit cost forced the balanced subsample in
+the first place, trading rows directly against the breadth of the tuning search.
+The network's limits are search-breadth limits, not a diagnosed failure. A
+single feature set was used at every level, so unlike the SVM there is no
+evidence whether weather or POI help or hurt; repeating the four-way comparison
+is the most direct lever. Architecture search was bounded the same way: layer
+width, learning rate, and dropout across 24 configurations, holding batch size,
+activation, and epoch budget fixed. No permutation-importance check was run for
+the network, only for the direct SVR, so whether weather and POI contribute is
+unknown.
+Both models fail on the same grids. Census/hourly and census/daily, the
+sparsest, most zero-inflated levels, defeat both, pointing at the data rather
+than the model. More generally, `base_demand` already carries most of the
+signal a scenario-conditioned framing allows, so both compete for a thin margin
+atop a strong baseline. The shared levers: weather interacted with hour and
+location rather than entered additively, weather resolved spatially rather than
+drawn from one citywide coordinate (@sec-data-prep), and POI expressed as
+distance to the nearest attractor rather than counts inside the cell.
 
 ## Smart Charging (Reinforcement Learning) {#sec-rl}
 
