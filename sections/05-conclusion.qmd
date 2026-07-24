@@ -8,24 +8,17 @@
   on PUBLIC charging stations? Give a recommendation.
 Keep the framing consultative and non-technical; state the "so what?" clearly. -->
 
-## Summary of Findings
+## Summary of Findings & Implications for the Client
 
 <!-- TODO: Recap the answers to the research questions from the introduction
 (demand patterns, hot spots, prediction accuracy, charging policy). -->
-
-## Implications for the Client
-
 <!-- TODO: Translate findings into actionable advice for the fleet operator.
 Include a clear recommendation on private vs. public charging infrastructure. -->
 
-## Limitations
+## Limitations & Future Work
 
 <!-- TODO: Data, modelling and methodological limitations. -->
-
-## Future Work
-
 <!-- TODO: Further analyses on this dataset and useful external data sources. -->
-
 <!-- OPTIONAL: Appendix — the assignment allows an appendix for supporting
 figures/code not needed in the main body. Add a "# Appendix {.unnumbered}"
 section here or in report.qmd if desired. -->
