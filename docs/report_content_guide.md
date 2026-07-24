@@ -245,6 +245,8 @@ Figure 2 shows the resulting policy: for each combination of remaining time and 
 
 Averaged over five independent training runs and evaluated on several thousand simulated days each, Tabular Q-Learning reduced the average daily charging cost from $1.92 (naive baseline) to $1.50 ± 0.02, while the probability of running out of energy (0.11% ± 0.09%) , remained close to the baseline.
 
+{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#tbl-naive-qtabular" >}}
+
 In practical terms, the model reduces the average electricity cost per vehicle by roughly 22% without a measurable change in the probability of a vehicle being stranded mid-shift.
 
 ##### Deep Q-Network
@@ -260,27 +262,11 @@ The retained policy (Figure 4) charges at full power in almost all observed stat
 
 Averaged over the same five training runs, DQN reduced the average daily cost to $1.46 ± $0.24, with a failure probability of 1.16% ± 0.96%. Thus, DQN is therefore comparable on average to Tabular Q-learning, but exhibits much greater variability between runs.
 
+{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#tbl-dqn-summary" >}}
+
 The variation across the five individual training runs (Table below) illustrates the underlying instability: one run reproduced the naive strategy almost exactly, while the remaining four achieved lower average costs but at much higher failure rates. This inconsistency, rather than the average result alone, is the primary reason DQN is not recommended for production use at this stage: the same training procedure produced markedly different risk profiles across otherwise identical runs.
 
-**Problem Formulation (MDP)** — design is set, write-up still needed:
-- State: `(b_t, t)` — battery level `b_t ∈ [0,50]` kWh, timestep `t ∈ {0..8}` (14:00–16:00 in 15-min steps)
-- Actions: `{0, 7.33, 14.67, 22}` kW (zero/low/medium/high — even quarters of max power)
-- Transition: deterministic charging for t<8; stochastic demand `D ~ N(μ=30, σ=5)` kWh revealed at t=8
-- Reward: negative recharging cost plus a large penalty for failing to cover D
-- Cost coefficient currently **constant** (α=0.0883 $/kWh, EIA Illinois retail rate) — the assignment's own cost formula supports time-varying α; flagged in the notebook as a TODO
-
-**Environment & Agent** — still TODO:
-- `SmartChargingEnv`: 50 kWh capacity, 22 kW max power, 8 fifteen-minute steps
-- Tabular `QLearningAgent`: Q-table over (step, battery), epsilon-greedy; hyperparameters LR=0.1, γ=1 (justify: no discounting makes sense given the short fixed horizon), epsilon=0.1
-- Training: 5,000 episodes — needs convergence discussion
-
-**Learned Policy**:
-- Heatmap already embedded (`fig-policy-heatmap`) — needs interpretation of when/how aggressively the agent charges as a function of remaining time and battery level, translated for a non-technical reader
-
-**Evaluation** — still TODO, notebook itself flags these as outstanding:
-- ~1,000 simulated days: failure rate + average cost vs. a naive baseline
-- Time-varying α_t (currently the single biggest simplification — likely understates the value of an intelligent agent versus a flat-rate baseline; worth prioritizing if time is limited)
-- Stronger baselines, multi-seed robustness, DQN comparison against the tabular MVP (assignment brief suggests DQN as the expected approach)
+{{< embed "notebooks/4.1 ReinforcementLearning.ipynb#tbl-dqn-breakdown" >}}
 
 ---
 
