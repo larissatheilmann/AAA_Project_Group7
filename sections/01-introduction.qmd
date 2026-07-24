@@ -14,19 +14,16 @@ The ride-hailing market is already crowded. Uber, Lyft, FreeNow, Lime, and Tier
 compete for the same trips, and current market reports point to ride-hailing,
 increasingly paired with autonomous and electric vehicles, as the segment that
 will dominate urban mobility in the near term. Our client, a well-established
-German car manufacturer, does not intend to watch from the sidelines. It is
-building a ride-hailing platform on a fully electrified vehicle fleet and plans
-to launch first in the United States, where customers have proven more
+German car manufacturer, is building a ride-hailing platform on a fully electrified vehicle fleet, wanting to
+launch first in the United States, where customers have proven more
 receptive to novel mobility business models.
 
-The gap is not ambition. It is operational know-how. The client can design and
-build vehicles; it has never run a ride-hailing fleet, and it has never run an
-electric one, where charging schedules constrain vehicle availability in ways a
-conventional taxi or rental fleet never had to manage. Before it can plan
-routes, size a fleet, or choose where to place its first vehicles, the client
-needs a working account of how demand for hailed rides moves through a city
-across space and time, and no such account yet exists for the market it plans
-to enter.
+The client can design and build vehicles, but has no experience running a
+ride-hailing fleet. Managing an electric fleet adds a further constraint:
+charging schedules directly affect vehicle availability in ways a conventional
+fleet does not face. To plan routes, size a fleet, and decide where to deploy
+vehicles, the client needs a clear picture of how demand moves through a city
+across space and time.
 
 This report builds that account from historical taxi trip data for Chicago,
 made available by the Chicago Data Portal and covering trips from 2024 onward.
@@ -48,10 +45,7 @@ driver's home between shifts, given a battery of finite capacity and a
 next-shift energy requirement that is not known with certainty in advance.
 Both decisions are considerably cheaper to get right on paper, using
 historical data and simulation, than after the client has already committed to
-vehicles and charging infrastructure. Getting the second one right also
-matters for the reason the client chose an electric fleet in the first place:
-a fleet only delivers on that choice if it is charged reliably enough to be
-available when a ride is requested.
+vehicles and charging infrastructure.
 
 ## Research Questions
 
