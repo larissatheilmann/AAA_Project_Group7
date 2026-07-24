@@ -12,7 +12,7 @@
 
 This section describes the preparation pipeline that turns the raw sources
 described in @sec-data into the analysis-ready datasets used throughout the
-report. A detailed table of the engineered features can be seen at 
+report. A detailed table of the engineered features can be seen in the 
 @tbl-engineered-features in the appendix.
 
 ## Taxi Trip Description and Cleaning
