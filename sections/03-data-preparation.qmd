@@ -92,7 +92,14 @@ defined continuously over any coordinate.
 
 ## Spatial and Temporal Discretisation
 
-<!-- Source notebook: notebooks/1.4 HourlySpatialAggregation.ipynb -->
-<!-- TODO: H3 hex grid (resolution 7 and 8) vs. census tract; hourly aggregation
-and any coarser temporal bins; join of taxi + weather + POI into
-data/processed/aggregated_grid_{7,8}.parquet. Explain why resolutions 7 and 8. -->
+<!-- Source notebook: notebooks/1.4 TemporalSpatialDiscretization.ipynb -->
+
+The grid is built from H3 resolution 7, every hexagon whose centroid falls
+inside the Chicago boundary. Census tract and community area join the same
+lookup by matching each hexagon centroid against the tract and community
+polygons, giving one crosswalk across all three spatial units. 
+Every unit is then crossed with two temporal bins, hourly and daily, 
+with pickups aggregated against all spatial and temporal levels. 
+Spatial units that never register a single pickup over the full 2.4-year window are
+dropped before the grid is written; the reduction removes only all-zero rows
+and costs no trips.
