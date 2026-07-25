@@ -20,12 +20,12 @@ receptive to novel mobility business models.
 
 The client can design and build vehicles, but has no experience running a
 ride-hailing fleet. Managing an electric fleet adds a further constraint:
-charging schedules directly affect vehicle availability in ways a conventional
+Charging schedules directly affect vehicle availability in ways a conventional
 fleet does not face. To plan routes, size a fleet, and decide where to deploy
 vehicles, the client needs a clear picture of how demand moves through a city
 across space and time.
 
-This report builds that account from historical taxi trip data for Chicago,
+This report builds from historical taxi trip data for Chicago,
 made available by the Chicago Data Portal and covering trips from 2024 onward.
 Taxis are not ride-hailing vehicles, but in a market the client has not yet
 entered, they are the closest available proxy for one: metered urban trips,
@@ -36,16 +36,9 @@ data from OpenStreetMap, and we analyze demand at spatial resolutions ranging
 from coarse census tracts to fine-grained H3 hexagon grids, and at multiple
 temporal resolutions, to establish which level of detail the data can actually
 support.
-
-Two decisions sit downstream of this analysis and give the report its
-structure. The first is where and when to expect demand, at a resolution fine
-enough to plan a fleet against rather than merely describe a market. The
-second is specific to an electric fleet: how a vehicle should charge at a
-driver's home between shifts, given a battery of finite capacity and a
-next-shift energy requirement that is not known with certainty in advance.
-Both decisions are considerably cheaper to get right on paper, using
-historical data and simulation, than after the client has already committed to
-vehicles and charging infrastructure.
+We also investigate how a vehicle should charge at a driver's home between shifts, 
+given a battery of finite capacity and a next-shift energy requirement that is not known 
+with certainty in advance, using Reinforcement Learning.
 
 ## Research Questions
 
@@ -54,15 +47,12 @@ into the next.
 
 1. How does taxi demand vary across space and time in Chicago, and what
    plausibly explains the patterns observed at different spatial units
-   (census tract versus H3 hexagons at resolution 7 and 8) and temporal bin
-   sizes?
+   and temporal bin sizes?
 2. Where are the persistent spatial hot spots of demand, and what do
    Gaussian mixture models and kernel density estimation reveal about their
    structure?
 3. Can demand be predicted for a specific spatial unit and time bucket rather
-   than simply extrapolated from the previous hour, for instance answering
-   what demand to expect on a rainy Sunday between 10 and 11 a.m. on the
-   outskirts of the city, and how does a support vector machine compare
+   than simply extrapolated from the previous hour, and how does a support vector machine compare
    against a feedforward neural network on this task?
 4. What charging policy should an electric taxi driver follow at home, given
    a charging rate that can be adjusted every fifteen minutes, a battery
@@ -71,16 +61,6 @@ into the next.
 5. What do these findings imply for the client's fleet operations, and in
    particular, should the client invest in private home charging
    infrastructure or rely on public charging networks instead?
-
-## Report Structure
-
-The remainder of this report is organised as follows.
-@sec-data describes the data sources.
-@sec-data-prep describes the preparation pipeline.
-@sec-analytics presents the descriptive spatial analysis, the
-demand-prediction models, and the reinforcement-learning approach to smart
-charging.
-@sec-conclusion discusses implications for the client and outlines future work.
 
 <!-- TIP (assignment notes): make generous use of visualization; justify every
 methodological choice; interpret results for a non-technical audience; an

@@ -10,26 +10,23 @@
 
 ## Data Sources
 
-Four raw datasets underpin the analysis: taxi trip records, hourly weather
-observations, points of interest, and a boundary layer of Chicago's community
+Three raw datasets underpin the analysis: taxi trip records, hourly weather
+observations, points of interest, accompanied by a boundary layer of Chicago's community
 areas. Each is described below by origin, coverage, and native granularity;
-the cleaning and feature-engineering steps applied to each follow in
-@sec-data-prep.
+the cleaning and feature-engineering steps applied to each follow in @sec-data-prep.
 
-The taxi trip records come from the Chicago Data Portal's Taxi Trips dataset.
-Before use, invalid rows (missing key identifiers, non-positive trip duration,
-or negative distance or fare) were dropped, and the table was trimmed to
-sixteen fields: trip and taxi identifiers, start and end timestamps, trip
-duration and distance, pickup and dropoff census tract and community area
-codes, the fare total, the operating company, and pickup and dropoff
-coordinates. Because census tract is missing from just over half of all trips
-(a mix of privacy suppression and trips ending outside Chicago) while
-community area is missing from under 9%, the cleaned data is kept as two
-parallel datasets: 14,494,804 trips with a known community area, and a
-stricter 6,835,451 trips that also have a known census tract. Both span
-January 1, 2024 through May 31, 2026, and each trip is a dispatched, metered
-ride at whatever time and location a passenger requested it, which is the
-pattern the client's own fleet will eventually have to anticipate.
+The taxi trip records come from the Chicago Data Portal's Taxi Trips dataset,
+which publishes one row per dispatched, metered taxi ride in the city. The raw
+download spans January 1, 2024 through May 31, 2026 and holds 16,086,255 trips
+across 23 fields: trip and taxi identifiers, start and end timestamps, duration
+and distance, the fare broken into its components and as a total, the operating
+company, and pickup and dropoff locations given as census tract, community area,
+and centroid coordinates. Locations are masked for privacy, so a published
+coordinate is the centroid of the containing census tract rather than the true
+pickup point, and the tract itself is withheld on just over half of all trips
+(55.3% of pickups, 56.6% of dropoffs) against 2.8% and 8.8% for community area.
+Each trip is a ride requested wherever and whenever a passenger wanted one,
+which is the demand pattern the client's own fleet will have to anticipate.
 
 Weather observations come from the ERA5-Land reanalysis product, pulled
 through the Copernicus Climate Data Store API for a single coordinate near
@@ -37,24 +34,16 @@ Chicago (latitude 42, longitude -87.8) rather than a network of ground
 stations. The record runs from January 1, 2024 through May 12, 2026 at hourly
 resolution and carries six variables: 2-metre air temperature, total
 precipitation, snow cover, snow depth, and the two horizontal components of
-wind at 10 metres. A reanalysis is a modeled reconstruction rather than a
-direct station reading, but it gives complete, gap-free hourly coverage for
-the entire trip period, which no single Chicago weather station could
-promise.
+wind at 10 metres. A reanalysis combines numerical weather prediction models 
+with observational data through data assimilation, resulting in a temporally 
+continuous representation of atmospheric conditions, which no single Chicago 
+weather station could promise.
 
 Points of interest come from OpenStreetMap, extracted with OSMnx for the
 "Chicago, Illinois, USA" boundary and limited to three tag families: amenity,
-shop, and tourism. The raw download returns 43,237 points spread across 311
-distinct combinations of those tags, later collapsed into fourteen categories
-relevant to travel demand (food and drink, nightlife, entertainment, and so
-on) during preparation. Unlike the trip and weather data, this is a snapshot
-of the map as it stands today, not a historical record tied to the trip
-period.
-
-The fourth source is a boundary layer for Chicago's 77 official community
-areas, used for spatial reference and choropleth mapping throughout the
-report. It is a distinct unit from the census tracts already present in the
-trip data itself: the taxi records carry pickup and dropoff census tract and
-community area codes directly, sourced under the portal's own privacy rules,
-while this boundary layer only supplies the outlines needed to draw them on a
-map.
+shop, and tourism. The raw download returns 43,237 points. Unlike the trip and
+weather data, this is a snapshot of the map as it stands today, not a historical
+record tied to the trip period.
+The boundary layer for Chicago's 77 official community areas is used for spatial reference 
+and choropleth mapping throughout the report. It is a distinct unit from the census tracts 
+already present in the trip data itself.

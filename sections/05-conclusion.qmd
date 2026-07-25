@@ -8,23 +8,39 @@
   on PUBLIC charging stations? Give a recommendation.
 Keep the framing consultative and non-technical; state the "so what?" clearly. -->
 
-## Summary of Findings
+## Summary of Findings & Implications for the Client
 
 <!-- TODO: Recap the answers to the research questions from the introduction
 (demand patterns, hot spots, prediction accuracy, charging policy). -->
-
-## Implications for the Client
-
 <!-- TODO: Translate findings into actionable advice for the fleet operator.
 Include a clear recommendation on private vs. public charging infrastructure. -->
 
-## Limitations
+Across both reinforcement learning approaches, Tabular Q-Learning proved the more suitable
+method for the client's charging problem: it converged reliably across all training runs, 
+reduced the average daily charging cost by roughly 22% relative to the naive baseline,
+and kept the probability of running out of energy close to that baseline. This directly 
+supports the client's goal of operating a dependable ride-hailing service without compromising 
+vehicle availability. Deep Q-Network achieved a comparable average cost and failure rate, but 
+its substantially higher variability across runs makes it a less predictable basis for a 
+service where a single stranded vehicle translates into a missed fare and reputational cost 
+for the platform. Based on these results, Tabular Q-Learning is recommended for the initial 
+fleet rollout, offering the client a solution that is both cost-effective and lightweight to 
+maintain in production. As the client's fleet grows or charging decisions are greatly extended, 
+DQN may become more relevant, positioning it as a natural next step for later stages of the 
+platform's expansion rather than for the current use case.
 
-<!-- TODO: Data, modelling and methodological limitations. -->
+## Limitations & Future Work
 
-## Future Work
-
-<!-- TODO: Further analyses on this dataset and useful external data sources. -->
+These results should be read as directional, not final. They come from
+Chicago's existing taxi trade rather than the client's own electric fleet,
+and the strongest demand models here only modestly beat a simple historical
+average, so cell and calendar information already explain most of what this
+data can tell us. The charging recommendation likewise rests on a fixed daily
+price curve and a single vehicle, rather than a full fleet drawing on a real,
+time-varying market. Validating both the demand patterns and the charging
+economics against the client's own operating data, once it exists, is the one
+step that would do more than any further modelling to confirm these findings
+hold in practice.
 
 <!-- OPTIONAL: Appendix — the assignment allows an appendix for supporting
 figures/code not needed in the main body. Add a "# Appendix {.unnumbered}"
