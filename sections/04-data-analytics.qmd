@@ -126,7 +126,7 @@ Resolve and state here, or move to the limitations.]
 
 <!-- Source notebooks: notebooks/3.2 PredictionCommonGround.ipynb (shared
 registry, sampling, scoring), 3.2a PredictionSVMStandard.ipynb (direct),
-3.2b PredictionSVMResidual.ipynb (residual). Validation figures below are read
+3.2b PredictionSVMResidual.ipynb (residual). Validation figures below are 
 from the post-zero-mile-drop artifacts in models_predictions/SVR/. -->
 
 Two SVR strategies are trained on identical splits, samples and candidate feature
@@ -276,8 +276,44 @@ unverified against the post-drop data.]
 ### Deep Learning Model {#sec-nn}
 
 <!-- Source notebook: notebooks/3.3 PredictionDeepLearning_Res7.ipynb -->
-<!-- TODO: Feedforward NN architecture, training setup, results per resolution. -->
 
+For the neural network, we used a feedforward network that predicts 
+log1p-transformed trip counts, which are then back-transformed via expm1 
+for evaluation. We trained on the full training split without any 
+zero/non-zero balancing, since our experiments showed that balanced sampling 
+actually hurt the FNN's performance. For all six levels we used the same 
+feature set, combining basic temporal and location features with all 14 POI 
+categories and 5 weather variables. We did not test different feature set 
+combinations as we did for the SVM, mostly due to computational constraints. 
+The network uses ReLU activations in the hidden layers, a linear output unit, 
+MSE as the loss function, and AdamW with a weight decay of 1e-4. Training ran 
+for up to 15 epochs with a batch size of 250. Within each training run, we 
+used early stopping with a patience of 3 to select the best checkpoint based 
+on validation loss, preventing the model from training past its best point. 
+To find the best architecture per level, we ran a grid search over four layer 
+configurations ([64,32,16], [128,64,32], [128,64,32,16], [256,128,64,32]), 
+three learning rates (0.01, 0.001, 0.0001), and two dropout rates (0.0, 0.2), 
+giving 24 configurations per level. The winning configuration per level was 
+selected by validation MAE in count space. The final performance of each 
+winning model was then evaluated once on the held-out test set, with results 
+reported in (Figure X) across MAE, RMSE and R². Looking at these 
+results, h3_7/hourly comes out as the best performing level overall. As shown 
+in (Table X), smaller and shallower networks worked best for the 
+denser levels like h3_7/hourly and community, while census levels needed 
+deeper networks and lower learning rates. Census/daily was the only level 
+where dropout helped, which fits with it being the hardest level to train 
+given its very high share of zero-demand rows. 
+(Table X)shows the FNN results across all six spatial-temporal levels.
+The model beats the historical-mean baseline at four of the six levels, with
+`h3_7/hourly` performing best at a skill score of +6.3% MAE. The gains are
+small across all levels. Two levels perform notably worse: `census/hourly` is
+essentially a coin flip at -0.1%, and `census/daily` loses to the baseline by
+a large margin (-20.3% MAE, -44.7% RMSE). These are the two sparsest and most
+zero-inflated levels in our dataset, and the SVM struggles there as well,
+which suggests the difficulty lies in the data rather than the model choice.
+Overall, the FNN performs best at finer temporal resolution and denser spatial
+units, while coarser and sparser levels remain hard to predict beyond a simple
+historical average. (Check after training)
 ### Model Comparison
 
 <!-- Source notebook: notebooks/3.4 ModelPerformanceVisualization.ipynb -->
