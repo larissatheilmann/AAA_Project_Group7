@@ -90,6 +90,10 @@ the other three add the POI and weather blocks to it.
 
 <!-- {{< embed "notebooks/3.2a PredictionSVMStandard.ipynb#tbl-svr-val-metrics" >}} -->
 
+```{=latex}
+\renewcommand{\longtablesize}{\scriptsize\setlength{\tabcolsep}{2pt}}
+```
+
 {{< embed "notebooks/3.2a PredictionSVMStandard.ipynb#tbl-svr-level-comparison" >}}
 
 {{< embed "notebooks/3.2a PredictionSVMStandard.ipynb#fig-svr-skill-by-level" >}}
@@ -104,6 +108,10 @@ the other three add the POI and weather blocks to it.
 {{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#fig-svr-residual2-skill-by-level" >}}
 
 {{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#tbl-svr-direct-vs-residual-final" >}}
+
+```{=latex}
+\renewcommand{\longtablesize}{\footnotesize}
+```
 
 {{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#fig-svr-direct-vs-residual-final" >}}
 
