@@ -117,6 +117,28 @@ the other three add the POI and weather blocks to it.
 
 ## Deep Learning Prediction (3.3)
 
+The grid search was run independently for each of the six spatial and temporal
+combinations, with the winning configuration selected by validation MAE in
+count space.
+
+| Stage | Setting | Values | Rationale |
+|-------|---------|--------|-----------|
+| Architecture search | Hidden Layer configurations | [64,32,16], [128,64,32], [128,64,32,16], [256,128,64,32] | Pyramid configurations outperformed equal-width configurations in initial experiments. |
+| | Learning rates | 0.01, 0.001, 0.0001 | Covers three orders of magnitude to account for level-specific convergence behaviour |
+| | Dropout rates | 0.0, 0.2 | Higher rates consistently hurt performance in initial tests |
+| | Configurations per level | 24 (full grid) | |
+| | Selection criterion | Validation MAE in count space | |
+| Training | Optimizer | AdamW (weight decay 1e-4) | Decouples weight decay from the gradient update, avoiding L2 scaling issues with adaptive optimizers [@loshchilov2019decoupled]. |
+| | Loss function | MSE | |
+| | Batch size | 250 | |
+| | Maximum epochs | 15 | |
+| | Early stopping patience | 3 epochs | Stops training after three consecutive epochs without validation improvement |
+| Feature set | Candidates | `basic+poi+weather` (fixed) | |
+| | Hourly features | 31 total | |
+| | Daily features | 29 total | |
+
+: FNN hyperparameter search grid. {#tbl-fnn-search-grid}
+
 | Level | Layers | Learning rate | Dropout |
 |-------|--------|---------------:|--------:|
 | community / hourly | 256, 128, 64, 32 | 0.001 | 0.0 |
@@ -143,6 +165,10 @@ the other three add the POI and weather blocks to it.
 
 ## SVM vs. Neural Network Performance Comparison (3.4)
 
+```{=latex}
+\clearpage
+```
+
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#tbl-svm-vs-nn-overall" >}}
 
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-scatter" >}}
@@ -153,11 +179,11 @@ the other three add the POI and weather blocks to it.
 
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-hex-r2" >}}
 
-{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-hex-delta" >}}
-
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-dayofweek" >}}
 
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-dayofweek-relerr" >}}
+
+{{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-hex-delta" >}}
 
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-hourofday" >}}
 
@@ -168,6 +194,10 @@ the other three add the POI and weather blocks to it.
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#tbl-svm-vs-nn-segments" >}}
 
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#fig-svm-vs-nn-segments-relerr" >}}
+
+```{=latex}
+\clearpage
+```
 
 ## Reinforcement Learning (4.1)
 
@@ -190,3 +220,7 @@ the other three add the POI and weather blocks to it.
 {{< embed "notebooks/4.1 ReinforcementLearning.ipynb#tbl-dqn-breakdown" >}}
 
 *No additional labeled figures or tables from this notebook.*
+
+```{=latex}
+\clearpage
+```
