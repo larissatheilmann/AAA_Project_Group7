@@ -63,28 +63,16 @@ historical-mean baseline, letting us ask whether a learned model, and a deep one
 especially, earns its added complexity.
 
 The target is `Total_Trip_Start`, the trip count per spatial unit and time
-bucket. The three spatial units carry 108 active hexagons at H3 resolution 7,
-496 active census tracts, and 77 community areas, after dropping inactive units
-with no pickups in the observation window during grid construction
-(@sec-data-prep). Sparsity differs sharply: zero-demand rows range from 0.8% at
-community/daily to 96.5% at census/hourly, driving the sampling decisions taken
-separately for each model family below.
-
-The reference point throughout is a historical mean per spatial unit, keyed by
-month and day of week, plus hour on the hourly grids. Computed on the training
-split alone and merged into validation and test, it carries no future
-information and serves double duty: as the `base_demand` feature available to
-both models, and as the skill-score benchmark, `1 - MAE_model / MAE_baseline`.
-Skill rather than raw MAE is reported because mean demand differs by roughly a
-factor of 80 across the six grids, making raw errors incomparable between them.
-
-Train, validation, and test are cut along the calendar rather than drawn at
+bucket. Train, validation, and test are cut along the calendar rather than drawn at
 random: the earliest 50% of unique dates train the models (2024-01-01 to
 2025-03-06), the next 20% validate (2025-03-07 to 2025-08-26), and the final 30%
 are held out for testing (2025-08-27 to 2026-05-12). A random row-level split
 would leak autocorrelated demand into the test set and contaminate
 `base_demand`. Model selection runs on validation; test is scored once, for the
-selected models.
+selected models. The reference point throughout is a historical mean per spatial unit, keyed by
+month and day of week, plus hour on the hourly grids. Computed on the training
+split alone and merged into validation and test: as the `base_demand` feature available to
+both models, and as the skill-score benchmark, `1 - MAE_model / MAE_baseline`, making raw errors incomparable between them.
 
 ### Support Vector Machine
 
@@ -93,211 +81,170 @@ registry, sampling, scoring), 3.2a PredictionSVMStandard.ipynb (direct),
 3.2b PredictionSVMResidual.ipynb (residual). Validation figures below are 
 from the post-zero-mile-drop artifacts in models_predictions/SVR/. -->
 
-Two SVR models train on identical splits, samples, and candidate feature sets,
-differing only in the prediction target. The direct model regresses
-`log1p(Total_Trip_Start)` and converts predictions back with `expm1`, clipped at
-zero. The residual model instead predicts the log-space correction to the
-historical mean, `log1p(demand) - log1p(base_demand)`, and reconstructs counts as
-`expm1(log1p(base_demand) + correction_hat)`; it never sees the raw target, only
-how far a cell and time bucket departs from its own history. The reasoning:
-`base_demand` already carries much of the predictable signal, so a model
-reproducing it from scratch would spend capacity re-deriving what the pipeline
-already computed. Because the correction sits on a far smaller scale and variance
-than `log1p(demand)`, hyperparameters tuned for one target do not transfer to the
-other, so each is tuned separately.
+Two Support Vector Machines are trained, differing only in what they aim at. The
+direct model predicts demand outright. The residual model predicts something
+narrower: how far a given place and time departs from its own historical average,
+which is then added back to that average. The reason to bother is that the
+historical average already carries most of the predictable signal, so a model
+built to correct it can spend its effort where the average falls short rather than
+relearning what is already known.
 
-SVR's fit cost is quadratic in sample size, so each level trains on a
-class-balanced sample: all non-zero training rows plus an equal number of zero
-rows (4,000 for the kernel scan, 8,000 for the grid search, the winner then
-re-scored on a 50,000-row validation draw). Levels with little zero demand, such
-as community/daily at 0.8%, end up non-zero-heavy instead. A uniform sample of
-the same size would be 94% empty at h3_7/hourly and 96.5% at census/hourly,
-leaving little for a model to learn beyond predicting zero. Validation and test
-stay unbalanced, so both models are scored at a natural prevalence they never
-trained on.
-
-Tuning runs in two stages per level and feature set: a kernel scan compares
-linear, polynomial, and RBF at a fixed baseline setting, judged by validation R²
-in count space, and the winning kernel alone carries into a three-fold grid
-search over `C` and `gamma` (extended by `degree` where polynomial wins), scored
-by count-space MAE. Four feature sets compete at every level: a basic
-calendar/location/history block, plus weather, plus POI, plus both.
-@tbl-svr-search-grid lists every searched value and sample size;
-@tbl-svr-feature-blocks lists the four feature blocks.
+Both share the same training setup. Because most place-and-time cells are empty,
+each model trains on a balanced mix of busy and empty cells so it does not simply
+learn to predict "nothing", while validation and testing keep the true,
+mostly-empty proportions the models will face in practice. For each model we
+compare four feature sets, from a calendar-and-location baseline up to one that
+adds weather and points of interest, and search for the best model settings. The
+exact search grid and feature blocks are listed in @tbl-svr-search-grid and
+@tbl-svr-feature-blocks.
 
 #### Validation Results
-The direct model does not beat the historical mean feature it is given. At five
-of six levels its tuned winner trails the baseline on validation MAE, from -3.5%
-at community/daily to -35.5% at census/hourly, and the one level it wins,
-h3_7/daily, it wins by just 0.2%. Predicting the correction instead lifts the
-skill score at all six levels, though unevenly: community/daily is the one clear
-win, at +5.3% (R² = 0.970); h3_7/daily turns its tie into a slim +1.2%;
-h3_7/hourly and census/daily stay near ties at +0.3%; community/hourly remains
-just short of the baseline at -1.0%. Census/hourly, the sparsest grid at 96.5%
-zero rows, loses heavily under both strategies (-35.5% direct, -32.1% residual),
-with MAE skill deeply negative while RMSE skill stays roughly flat (+0.7%
-residual). Daily aggregation beats hourly at all three spatial resolutions under
-both strategies, since hourly bins are sparser and noisier.
+Predicting demand outright, the direct model rarely earns its keep. Across
+nearly every grid its tuned winner trails the historical-mean baseline on
+validation, and the one grid where it comes out ahead does so by a margin too
+thin to call a win. The pattern follows from what the model is asked
+to do: reconstructing absolute demand from scratch means relearning the
+historical pattern before it can improve on it, and most of the six grids do
+not hand it enough signal to do both (@tbl-svr-level-comparison,
+@fig-svr-skill-by-level).
 
-Every winning direct model needs the flexible RBF kernel; four of the six
-winning residual models do just as well with a straight line (both h3_7 levels,
-census/hourly, and community/daily). Both models operate on a compressed scale
-that gets expanded back into trip counts, so a small error before expansion
-becomes large after it. The direct model predicts demand itself, anywhere from
-zero to several thousand trips a day, and needs the extra curvature to stop those
-errors from compounding; the residual model predicts only a small adjustment, so
-even a straight line stays close enough that expansion cannot run away with it.
-All six residual winners settle at `C=1`, against direct winners spread from
-`C=1` to `C=50`.
+Reframing the target as a correction to that same historical mean, rather
+than demand itself, changes the picture everywhere, but not evenly. One
+grid delivers a clear win (Community/Daily), a second, also on daily data, adds a smaller but
+genuine edge (H3_7/Daily). Three more land close enough to the baseline, in either
+direction, to call them ties; and the most zero-inflated grid (Census/Hourly) is
+the one place the correction does more harm than good. Daily grids
+beat their hourly counterparts throughout, under both framings, coarser data giving each more to hold on to (@tbl-svr-residual2-level-comparison,
+@fig-svr-residual2-skill-by-level, @tbl-svr-direct-vs-residual-final).
 
-The two best models are both residual. At community/daily, a linear fit at `C=1`
-on the basic+weather feature set brings the average error down from the
-baseline's 36.19 trips per area-day to 34.25, at R² = 0.970. Second is
-h3_7/daily, on the basic+poi feature set, also linear at `C=1`, moving 15.83
-trips per hexagon-day to 15.64 at R² = 0.954. Both sit on daily grids, correct a
-historical mean rather than predicting demand outright, and need no curved
-kernel. The operational margin is small: roughly two trips per area per day at
-the better of the two, and about a fifth of a trip per hexagon at the other.
+The two strongest configurations overall are both residual models fitted on
+daily data, and both do well with a simple linear fit rather than a more complex
+one. The margin they add over the historical average is real but modest, with the
+exact figures in @tbl-svr-residual2-level-comparison.
 
 ### Deep Learning Model {#sec-nn}
 
-<!-- Source notebook: notebooks/3.3 PredictionDeepLearning_Res7.ipynb -->
+<!-- Source notebook: notebooks/3.3 PredictionDeepLearning.ipynb -->
 
-For the neural network, we used a feedforward network that predicts 
-log1p-transformed trip counts, which are then back-transformed via expm1 
-for evaluation. We trained on the full training split without any 
-zero/non-zero balancing, since our experiments showed that balanced sampling 
-actually hurt the FNN's performance. For all six levels we used the same 
-feature set, combining basic temporal and location features with all 14 POI 
-categories and 5 weather variables. We did not test different feature set 
-combinations as we did for the SVM, mostly due to computational constraints. 
-The network uses ReLU activations in the hidden layers, a linear output unit, 
-MSE as the loss function, and AdamW with a weight decay of 1e-4. Training ran 
-for up to 15 epochs with a batch size of 250. Within each training run, we 
-used early stopping with a patience of 3 to select the best checkpoint based 
-on validation loss, preventing the model from training past its best point. 
-To find the best architecture per level, we ran a grid search over four layer 
-configurations ([64,32,16], [128,64,32], [128,64,32,16], [256,128,64,32]), 
-three learning rates (0.01, 0.001, 0.0001), and two dropout rates (0.0, 0.2), 
-giving 24 configurations per level. The winning configuration per level was 
-selected by validation MAE in count space. The final performance of each 
-winning model was then evaluated once on the held-out test set, with results 
-reported in (Figure X) across MAE, RMSE and R². Looking at these 
-results, h3_7/hourly comes out as the best performing level overall. As shown
-in (Table X), smaller and shallower networks worked best for the 
-denser levels like h3_7/hourly and community, while census levels needed 
-deeper networks and lower learning rates. Census/daily was the only level 
-where dropout helped, which fits with it being the hardest level to train 
-given its very high share of zero-demand rows. 
-(Table X)shows the FNN results across all six spatial-temporal levels.
-The model beats the historical-mean baseline at four of the six levels, with
-h3_7/hourly performing best at a skill score of +6.3% MAE. The gains are
-small across all levels. Two levels perform notably worse: census/hourly is
-essentially a coin flip at -0.1%, and census/daily loses to the baseline by
-a large margin (-20.3% MAE, -44.7% RMSE). These are the two sparsest and most
-zero-inflated levels in our dataset, and the SVM struggles there as well,
-which suggests the difficulty lies in the data rather than the model choice.
-Overall, the FNN performs best at finer temporal resolution and denser spatial
-units, while coarser and sparser levels remain hard to predict beyond a simple
-historical average. (Check after training)
+The neural network differs from the Support Vector Machine in two ways that
+matter. It trains on the full data at its natural, mostly-empty proportions,
+because a balanced sample actively hurt its accuracy in early tests. And it uses a
+single feature set at every level, the fullest one, rather than comparing four, a
+compute-budget choice rather than a finding that the others do not matter. As with
+the Support Vector Machine, the network's depth and training settings are chosen
+by a search per level and selected on the validation data; the winning
+configurations are listed in @tbl-fnn-architecture-by-level.
 
 #### Validation Results
-<!-- Add NN comparions here -->
+The network is best read as an hourly specialist rather than an
+all-purpose forecaster. It clears the historical-mean baseline at only two
+of the six levels, both hourly, and its one clear win, a 9.7% gain over the
+baseline at community/hourly, sits at the same level and grain where the
+Support Vector Machine is weakest. Every daily-resolution grid falls short
+of that same naive baseline regardless of spatial detail, community
+included and h3_7/daily worst of all at nearly 32% below it, so the
+temporal grain the model predicts at matters far more than which spatial
+unit it covers (@tbl-fnn-level-comparison, @fig-fnn-skill-by-level).
+
+The winning architecture tracks that same pattern rather than following
+spatial density in any simple way. The strongest level, community/hourly,
+uses the largest and deepest network tested; the two census levels, the
+sparsest and most zero-inflated in the dataset, both settle on the
+smallest. Dropout is selected only at the two levels most prone to
+overfitting, h3_7/daily and census/daily, consistent with those being the
+hardest grids to fit without memorizing noise (@tbl-fnn-architecture-by-level).
+Taken together with the Support Vector Machine's own results, the pattern
+points at the data rather than either model: a historical average already
+captures most of what a day or an hour's demand will look like, and the
+daily grids in particular leave the network little room to add anything
+beyond replaying that average back.
 
 ### Model Comparison
 
-<!-- Source notebook: notebooks/3.4 ModelPerformanceVisualization.ipynb -->
+<!-- Source notebook: notebooks/3.4 ModelPerformanceVisualization.ipynb. The
+comparison runs at community/daily and community/hourly, the two levels where
+the SVM and the neural network respectively reach their best result (see
+docs/report_content_guide.md, 4.2 "Model Comparison"). Supporting figures and
+tables are embedded in @sec-appendix. -->
 
-<!-- TODO: the list below states WHICH analyses are run and where each figure
-lives. The interpretation of their results is still to be written, and must wait
-until 3.3 has been re-run (the FNN prediction files predate the zero-mile-trip
-drop) and 3.4 re-executed on top of it. The outputs currently saved in 3.4 come
-from the earlier broken-merge run and must not be quoted. See
-docs/report_content_guide.md 4.2 "Model Comparison" for the full warning. -->
+The two model families are compared directly on the same held-out test data,
+at the level where each independently performs best: Chicago's 77 community
+areas, assessed separately at daily and hourly resolution. That both the
+Support Vector Machine and the neural network converge on this same,
+comparatively coarse geography is worth stating plainly on its own: neither
+the finer hexagon grid nor individual census tracts produced a more accurate
+forecast for either model. A citywide rollout does not need finer-grained
+location data to plan around.
 
-Both models types are compared on the same held-out test split, at H3 resolution 7
-and at both temporal bins, against the same historical-mean baseline. Census and
-community levels are excluded: [GAP]the SVM was scored there, but no matching neural
-network prediction file exists, so a comparison at those levels would not be
-like-for-like. The comparison runs along six lines, each asking a different
-question about where a model's error actually falls. Supporting figures and
-tables are collected in @sec-appendix.
+No single model wins outright. Instead, the two split the job by time
+horizon. Forecasting a full day ahead, the Support Vector Machine cuts the
+average error from 49.58 to 46.34 trips per area per day, a 6.5% improvement
+over simply assuming tomorrow looks like the recent average; the neural
+network, over the same day-ahead horizon, does 10.0% worse than that same
+naive assumption. Forecasting within a single hour, the ranking reverses: the
+neural network cuts the average error from 2.90 to 2.62 trips per area per
+hour, a 9.7% gain, while the Support Vector Machine is essentially
+indistinguishable from the naive estimate (@tbl-svm-vs-nn-overall). For the
+client, the practical reading is direct: trust the Support Vector Machine for
+next-day capacity planning, and trust the neural network for forecasting how
+demand moves within a shift.
 
-- **Aggregate accuracy.** MAE, RMSE and R² for the baseline, the SVM and the
-  network at each temporal resolution, establishing whether either model beats
-  the historical mean at all and by how much (@tbl-svm-vs-nn-overall).
-- **Predicted against actual.** Predicted versus observed demand per cell and
-  bucket, which exposes systematic over- or under-prediction and the demand range
-  at which the fit degrades, read as spread away from the diagonal
-  (@fig-svm-vs-nn-scatter).
-- **Spatial error.** Error aggregated per hexagon and mapped three ways: absolute
-  error (@fig-svm-hex-mae), error relative to each cell's own mean demand
-  (@fig-svm-hex-mre), and the share of each cell's day-to-day variation the model
-  explains (@fig-svm-hex-r2). The absolute and relative views answer different
-  questions, since the largest absolute errors concentrate downtown purely because
-  demand is largest there, while the relative view is what makes the quiet outer
-  cells legible at all.
-- **Head-to-head by location.** The per-hexagon difference `MAE_NN - MAE_SVM`
-  mapped directly, so that which model wins where is read off a single diverging
-  scale rather than inferred by comparing two separate colour ramps
-  (@fig-svm-vs-nn-hex-delta).
-- **Temporal error.** Error by day of week (@fig-svm-vs-nn-dayofweek,
-  @fig-svm-vs-nn-dayofweek-relerr) and, on the hourly grid only, by hour of day
-  (@fig-svm-vs-nn-hourofday, @fig-svm-vs-nn-hourofday-relerr), each in absolute
-  terms and relative to mean demand. This separates error that simply tracks
-  demand volume from error concentrated at particular times, such as the overnight
-  hours where demand is near zero and small absolute misses dominate the relative
-  figure. City-wide predicted and actual demand across the full test period is
-  plotted alongside as a sanity check on aggregate level and drift
-  (@fig-svm-vs-nn-timeseries).
-- **Error by segment.** Test MAE, relative error and skill score broken down by
-  demand band (zero, 1-10, 11-100, and above 100 trips) and by weather (dry
-  against rainy days), as a table (@tbl-svm-vs-nn-segments) and as relative error
-  per segment (@fig-svm-vs-nn-segments-relerr). This is the decisive view for
-  fleet planning, because a model that wins on average can still lose on exactly
-  the busiest cells, or on the rainy days, that matter operationally.
+That division sharpens once demand is broken down by how busy an area
+actually is (@tbl-svm-vs-nn-segments). At the daily level, the Support Vector
+Machine beats the naive average across every demand tier tested, from
+pickup-free days to the busiest area-days on record, and its edge is
+largest, 7.0%, on exactly the days that matter most financially: the
+high-demand days where too few vehicles means turning riders away and too
+many means idle, charging capital sitting unused. The neural network trails
+the baseline across every one of the same daily tiers, worst of all on
+medium-demand days, where it gives up more than 30% of the baseline's
+accuracy. Within the hour, the Support Vector Machine's record is more mixed:
+a 19.4% gain on hours with no demand at all, roughly break-even on
+moderately busy hours, and a loss of ground on both quiet, low-demand hours
+and, more consequentially, the busiest ones. The neural network beats the
+baseline on every hour with any demand at all, gaining 11.3% on
+medium-demand hours and 11.1% on high-demand hours.
 
-<!-- NOTE: These embeds resolve once "3.4 ModelPerformanceVisualization.ipynb"
-has been executed and saved with the labelled cells' outputs. If a render fails
-on a missing embed, run and save 3.4 first (its SVR bundles come from 3.2a/3.2b).
--->
+A forecast that only holds up in good weather would be of limited use to an
+operator whose founding question is what to expect on a rainy Sunday.
+Neither recommended model shows that weakness. The Support Vector Machine's
+day-ahead accuracy is, if anything, slightly better on rainy days than dry
+ones, and the neural network's hourly accuracy is marginally stronger in the
+rain too. Weather is not a blind spot for either tool at this level of
+geography.
+
+Mapped across the city, each model's advantage falls exactly where the
+demand-tier results predict (@fig-svm-vs-nn-hex-delta). At daily resolution,
+the Support Vector Machine's lower error holds in almost every district. At
+hourly resolution, the neural network's advantage concentrates in the
+busiest central districts, downtown and the Near North Side, where
+hour-to-hour demand swings are largest and a positioning mistake is most
+expensive. The underlying maps, and a further breakdown by day of week, hour
+of day, and calendar period, are collected in @sec-appendix.
+
+#### Recommendation
+
+The two models are best deployed together rather than chosen between: the Support
+Vector Machine for day-ahead capacity planning across service areas, and the
+neural network for repositioning vehicles within a shift once the operation is
+ready for it. Because a finer geographic grid bought neither model any extra
+accuracy, near-term effort is better spent getting day-ahead district planning
+right than on acquiring more granular location data.
 
 ### Shortfalls and Improvement Levers {#sec-shortfalls}
 
-<!-- Sources: docs/report_content_guide.md 4.2 "Shortfalls & improvement levers".
-NOTE on the two-stage-search check: the full per-kernel run in
-models_predictions/SVR/residual_kernelgrid/ dates from 23 Jul, before the
-zero-mile-trip drop (its h3_7/daily baseline val MAE is 14.658 vs. 15.830 in the
-current run), so its skill figures are not comparable to the reported ones. The
-claim is therefore kept qualitative -- do not quote cross-run numbers from it
-without re-running that search on the post-drop data. -->
+<!-- Source: docs/report_content_guide.md, 4.2 "Shortfalls & improvement levers"
+(community-level run, post-zero-mile-drop). Kept brief and results-facing;
+technical remediation detail lives in the source guide, not here. -->
 
-Neither family clears the historical mean by a wide margin; the limits split
-into three groups: SVM-specific, network-specific, and shared.
-For the SVM, one failure mode is specific and fixable: the residual model
-underperforms the baseline on true-zero-demand cells, since the correction term
-does not shrink to zero where it should, and these rows dominate most levels. A
-floor on the reconstructed correction, or a zero/non-zero gate before regressing
-magnitude, would both be worth testing. Smaller gains could come from a
-different sample balance, since a natural-prevalence draw performed worse, or a
-larger sample, though SVR's quadratic fit cost forced the balanced subsample in
-the first place, trading rows directly against the breadth of the tuning search.
-The network's limits are search-breadth limits, not a diagnosed failure. A
-single feature set was used at every level, so unlike the SVM there is no
-evidence whether weather or POI help or hurt; repeating the four-way comparison
-is the most direct lever. Architecture search was bounded the same way: layer
-width, learning rate, and dropout across 24 configurations, holding batch size,
-activation, and epoch budget fixed. No permutation-importance check was run for
-the network, only for the direct SVR, so whether weather and POI contribute is
-unknown.
-Both models fail on the same grids. Census/hourly and census/daily, the
-sparsest, most zero-inflated levels, defeat both, pointing at the data rather
-than the model. More generally, `base_demand` already carries most of the
-signal a scenario-conditioned framing allows, so both compete for a thin margin
-atop a strong baseline. The shared levers: weather interacted with hour and
-location rather than entered additively, weather resolved spatially rather than
-drawn from one citywide coordinate (@sec-data-prep), and POI expressed as
-distance to the nearest attractor rather than counts inside the cell.
+Both models share one ceiling. On the sparsest, most fragmented grids, too few
+trips occur for either to add much beyond the historical average, and more broadly
+that average already captures most of what is predictable about a given place and
+time. Neither model replaces it so much as improves on it at the margin. The
+clearest lever for a follow-up is to train future versions on demand as it
+actually occurs, rather than on the balanced mix used here to cope with the many
+empty cells; that is the likeliest route to closing the Support Vector Machine's
+remaining weakness on the busiest hours.
 
 ## Smart Charging (Reinforcement Learning) {#sec-rl}
 
@@ -319,8 +266,13 @@ tabular Q-learning MVP. It is WIP — several cells carry TODOs (describe the En
 Agent / Training, vary alpha_t over time, add stronger baselines, multi-seed
 robustness, and a DQN agent for comparison). Fill those in as the notebook matures. -->
 
-### Executive Summary
-An automated charging controller was designed and evaluated for the client's ride-hailing EV fleet, comparing two reinforcement learning methods: Tabular Q-Learning and a Deep Q-Network (DQN). Across five independent training runs, Tabular Q-Learning reduced the average daily charging cost by roughly 22% relative to a naive always-full-power baseline, with the probability of running out of energy remaining close to that baseline. DQN achieved comparable average performance with fewer training episodes but showed substantially higher variability across runs and is not recommended for deployment at this stage. The DQN approach may become more relevant as for example the state complexity increases greatly.
+The final task moves from forecasting demand to acting on it: an automated
+controller that decides how fast an electric taxi should charge at home between
+shifts, balancing the electricity bill against the risk of leaving too little
+charge for the next day's work. We compared two reinforcement-learning methods,
+Tabular Q-Learning and a Deep Q-Network (DQN). The simpler Tabular approach is the
+one we recommend deploying now; DQN is held back for later, more complex versions
+of the problem, for the reasons that follow.
 
 ### Problem Framing & Methodology
 Each vehicle returns home at 2:00 PM and must depart at 4:00 PM. During this window, an automated controller decides every 15 minutes how fast to charge the battery, choosing from four charging speeds. Electricity prices rise later in the afternoon, while the energy required for the day's shift is unknown until departure and varies around 30 kWh. Running out of energy mid-shift causes a missed fare and a stranded vehicle is substantially more costly than a marginally higher electricity bill. Thus, the controller must balance cost against this risk.

@@ -14,7 +14,7 @@ author:
 contact: torlitz@smail.uni-koeln.de # Specify one contact for the project
 supervisor: "Univ.-Prof. Dr. Wolfgang Ketter"
 co-supervisor: "Janik Muires" # TA of the course is the co-supervisor
-date: 2026-04-01 # Date of submission
+date: 2026-07-26 # Date of submission
 ---
 
 <!-- While you could use \clearpage or \newpage, this is the recommended way to insert a page break in Quarto as it translates to the native page break command for the output format you are using (e.g., \clearpage for PDF, <div style="page-break-after: always;"></div> for HTML). -->
@@ -32,6 +32,8 @@ date: 2026-04-01 # Date of submission
 {{< include sections/04-data-analytics.qmd >}}
 
 {{< include sections/05-conclusion.qmd >}}
+
+{{< pagebreak >}}
 
 \appendix
 

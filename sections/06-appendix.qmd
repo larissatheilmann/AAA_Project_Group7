@@ -117,7 +117,29 @@ the other three add the POI and weather blocks to it.
 
 ## Deep Learning Prediction (3.3)
 
-*No additional labeled figures or tables from this notebook.*
+| Level | Layers | Learning rate | Dropout |
+|-------|--------|---------------:|--------:|
+| community / hourly | 256, 128, 64, 32 | 0.001 | 0.0 |
+| community / daily | 128, 64, 32, 16 | 0.01 | 0.0 |
+| h3_7 / hourly | 128, 64, 32, 16 | 0.0001 | 0.0 |
+| h3_7 / daily | 128, 64, 32, 16 | 0.01 | 0.2 |
+| census / hourly | 64, 32, 16 | 0.001 | 0.0 |
+| census / daily | 64, 32, 16 | 0.001 | 0.2 |
+
+: Winning FNN architecture per level, selected by validation MAE in count space over a grid of four layer configurations, three learning rates, and two dropout rates (24 configurations per level). {#tbl-fnn-architecture-by-level}
+
+| Level | MAE | RMSE | R² | Skill (MAE) | Skill (RMSE) |
+|-------|----:|-----:|---:|-------------:|--------------:|
+| community / hourly | 2.620 | 9.678 | 0.925 | +9.7% | +12.7% |
+| h3_7 / hourly | 1.041 | 7.358 | 0.883 | +2.5% | +1.0% |
+| census / hourly | 0.276 | 2.218 | 0.844 | −1.0% | −6.1% |
+| community / daily | 54.518 | 190.617 | 0.921 | −10.0% | −4.8% |
+| census / daily | 6.355 | 42.094 | 0.819 | −29.2% | −42.7% |
+| h3_7 / daily | 28.209 | 155.722 | 0.844 | −31.9% | −28.7% |
+
+: FNN test performance per level against the historical-mean baseline (skill = 1 − MAE_model / MAE_baseline), sorted by skill (MAE). {#tbl-fnn-level-comparison}
+
+{{< embed "notebooks/3.3 PredictionDeepLearning.ipynb#fig-fnn-skill-by-level" >}}
 
 ## SVM vs. Neural Network Performance Comparison (3.4)
 

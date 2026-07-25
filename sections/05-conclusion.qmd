@@ -8,40 +8,59 @@
   on PUBLIC charging stations? Give a recommendation.
 Keep the framing consultative and non-technical; state the "so what?" clearly. -->
 
-## Summary of Findings & Implications for the Client
+Taxi demand across Chicago is concentrated, not spread. At every spatial
+resolution tested, roughly 99% of pickups occur in the busiest tenth of
+locations, and hot-spot analysis places that concentration where the densest
+mix of commerce, transit, and evening entertainment sits: the central business
+district and the major transport hubs. Demand also follows a dependable daily
+rhythm, quiet overnight and peaking around the commute and again in the evening,
+with weekends distinct from weekdays. This is structure a fleet operator can plan
+against. Moving to a finer geographic grid added little beyond what census tracts
+and community areas already showed, because the data's privacy masking snaps most
+coordinates back to their census tract.
 
-<!-- TODO: Recap the answers to the research questions from the introduction
-(demand patterns, hot spots, prediction accuracy, charging policy). -->
-<!-- TODO: Translate findings into actionable advice for the fleet operator.
-Include a clear recommendation on private vs. public charging infrastructure. -->
+For the client, that points to concentrating the initial fleet in the few
+districts that generate almost all demand rather than spreading vehicles evenly,
+and to planning around the administrative geography Chicago already publishes
+rather than a bespoke fine-grained grid.
 
-Across both reinforcement learning approaches, Tabular Q-Learning proved the more suitable
-method for the client's charging problem: it converged reliably across all training runs, 
-reduced the average daily charging cost by roughly 22% relative to the naive baseline,
-and kept the probability of running out of energy close to that baseline. This directly 
-supports the client's goal of operating a dependable ride-hailing service without compromising 
-vehicle availability. Deep Q-Network achieved a comparable average cost and failure rate, but 
-its substantially higher variability across runs makes it a less predictable basis for a 
-service where a single stranded vehicle translates into a missed fare and reputational cost 
-for the platform. Based on these results, Tabular Q-Learning is recommended for the initial 
-fleet rollout, offering the client a solution that is both cost-effective and lightweight to 
-maintain in production. As the client's fleet grows or charging decisions are greatly extended, 
-DQN may become more relevant, positioning it as a natural next step for later stages of the 
-platform's expansion rather than for the current use case.
+Demand can be predicted for a specific place and time, not just extrapolated from
+the previous hour, though within limits. Both models are most accurate at the
+same geography, Chicago's 77 community areas, and neither wins outright; they
+divide the work by time horizon. The support vector machine is the more reliable
+day-ahead forecaster, beating a historical-average benchmark by about 6.5% and
+holding that edge on quiet and busy days alike. The neural network is stronger
+within the hour, beating the same benchmark by about 9.7%, with its advantage
+concentrated on the busy hours where the support vector machine slips. Neither
+falters on rainy days, the rainy-Sunday scenario the brief singled out. The deep
+model does not earn its added complexity everywhere: at day-ahead resolution it
+trails even the naive benchmark. The two are best run together, the support vector
+machine sizing the fleet a day out and the neural network repositioning it within
+a shift once the operation is ready.
 
-## Limitations & Future Work
+For smart charging, Tabular Q-Learning is the method to deploy first. It converged
+reliably across every training run and cut the average daily charging cost by
+roughly 22% against the naive baseline, while holding the risk of running out of
+charge near that baseline and so keeping vehicle availability intact. The Deep
+Q-Network matched it on average cost and failure rate but varied far more from run
+to run, a poor trade for a service where one stranded vehicle means a missed fare.
+It becomes worth revisiting only as the fleet and its charging decisions grow more
+complex.
 
-These results should be read as directional, not final. They come from
-Chicago's existing taxi trade rather than the client's own electric fleet,
-and the strongest demand models here only modestly beat a simple historical
-average, so cell and calendar information already explain most of what this
-data can tell us. The charging recommendation likewise rests on a fixed daily
-price curve and a single vehicle, rather than a full fleet drawing on a real,
-time-varying market. Validating both the demand patterns and the charging
-economics against the client's own operating data, once it exists, is the one
-step that would do more than any further modelling to confirm these findings
-hold in practice.
+That same controllability settles the larger infrastructure question. Both the
+cost saving and the reliability depend on dictating when and how fast each vehicle
+charges, which is only possible on chargers the operator controls. Private charging
+at the driver's home, over the idle window between shifts, is therefore the better
+default than leaning on public stations, where the driver pays the posted rate and
+competes for an open plug. Public charging is best reserved as a fallback, for
+unusually long shifts or drivers without home access. This rests on the operational
+case rather than a full comparison of installation cost against public-charging
+fees, which a follow-up should price out.
 
-<!-- OPTIONAL: Appendix — the assignment allows an appendix for supporting
-figures/code not needed in the main body. Add a "# Appendix {.unnumbered}"
-section here or in report.qmd if desired. -->
+These findings are directional, not final. They come from Chicago's existing taxi
+trade rather than the client's own electric fleet, and the demand models beat a
+simple historical average only modestly, so location and calendar already explain
+most of what the data can. The charging result likewise rests on a fixed daily
+price curve and a single vehicle, not a full fleet in a live market. Validating
+both against the client's own operating data, once it exists, would do more to
+confirm these conclusions than any further modelling.
