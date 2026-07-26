@@ -4,15 +4,9 @@ This appendix collects supporting figures and tables that are not reproduced
 in the main body of the report, organized by the notebook that produces them
 (see the pipeline overview in the project `CLAUDE.md`).
 
-## Taxi Data Preparation (1.1)
-
-*No additional labeled figures or tables from this notebook.*
-
 ## Weather Data Preparation (1.2)
 
 {{< embed "notebooks/1.2 WeatherDataPrep.ipynb#tbl-meteo-var" >}}
-
-*No additional labeled figures or tables from this notebook.*
 
 ## Points of Interest Data Preparation (1.3)
 
@@ -26,21 +20,50 @@ in the main body of the report, organized by the notebook that produces them
 
 {{< embed "notebooks/1.3 POIDataPrep.ipynb#fig-poi-category-corr" >}}
 
-## Temporal-Spatial Discretization (1.4)
-
-*No additional labeled figures or tables from this notebook.*
-
+\FloatBarrier
 ## Descriptive Analysis: Spatial (2.1)
 
-*No additional labeled figures or tables from this notebook.*
+![Spatial pickup demand distribution for different spatial entities.](plots/spatial_pickup_distribution.png){#fig-app-spatial-pickup fig-pos='H' width=90%}
+
+![Spatial dropoff demand distribution for different spatial entities.](plots/spatial_dropoff_distribution.png){#fig-app-spatial-dropoff fig-pos='H' width=90%}
+
+![Difference between pickup and dropoff demand across community areas. Positive values indicate net pickup regions, while negative values indicate net dropoff regions.](plots/pickup_dropoff_difference.png){#fig-app-pickup-dropoff-diff fig-pos='H' width=70%}
+
+![Average Trip Length and average Trip Duration.](plots/triplength_duration.png){#fig-app-trip-length-duration fig-pos='H' width=90%}
+
+![Demand concentration across different spatial resolutions measured by Lorenz curves. The increasing curvature with finer spatial resolutions indicates stronger concentration of taxi demand in a small number of spatial units.](plots/demand_concentration.png){#fig-app-demand-concentration fig-pos='H' width=85%}
+
+| Spatial resolution | Number of regions | Unit-hour cells | Non-empty cells | Empty cells (%) | Median active hours / region | Mean pickups / non-empty cell |
+|:-------------------|------------------:|----------------:|----------------:|----------------:|-----------------------------:|------------------------------:|
+| Community Areas | 77 | 1,594,824 | 874,335 | 45.2 | 11,399 | 14.81 |
+| Census Tracts | 496 | 10,273,152 | 395,926 | 96.1 | 9 | 15.29 |
+| H3 Resolution 7 | 115 | 2,381,880 | 902,523 | 62.1 | 7,215 | 14.35 |
+| H3 Resolution 8 | 393 | 8,139,816 | 1,142,127 | 86.0 | 21 | 11.34 |
+| H3 Resolution 9 | 560 | 11,598,720 | 1,251,215 | 89.2 | 15 | 10.35 |
+
+: Spatial sparsity statistics across spatial resolutions. Increasing spatial resolution substantially increases the number of empty unit-hour cells, while H3 Resolution 7 provides a balance between spatial detail and data density. {#tbl-spatial-sparsity}
+
+![Gaussian Mixture Model (GMM) hot spots.](plots/GMM.png){#fig-app-gmm fig-pos='H' width=55%}
+
+![Kernel density estimation of taxi demand.](plots/kernel_density.png){#fig-app-kde fig-pos='H' width=55%}
 
 ## Descriptive Analysis: Temporal (2.2)
 
-*No additional labeled figures or tables from this notebook.*
+![Daily taxi demand over the observation period.](plots/daily_taxi_demand.png){#fig-app-daily-demand fig-pos='H' width=90%}
 
-## Descriptive Analytics: Weather (2.4)
+![Hourly taxi demand.](plots/hourly_demand_bar.png){#fig-app-hourly-demand fig-pos='H' width=80%}
 
-*No additional labeled figures or tables from this notebook.*
+![Hourly demand on weekdays and weekends.](plots/hourly_demand_weekday_weekend.png){#fig-app-weekday-weekend fig-pos='H' width=80%}
+
+![Average trip distance by hour.](plots/hourly_tripdistance.png){#fig-app-trip-distance fig-pos='H' width=80%}
+
+![Average travel speed by hour.](plots/hourly_demand_speed.png){#fig-app-speed fig-pos='H' width=80%}
+
+![Average fare per mile by hour.](plots/hourly_demand_fare.png){#fig-app-fare fig-pos='H' width=80%}
+
+![Correlation matrix of hourly demand and trip characteristics.](plots/hourly_demand_correlation.png){#fig-app-correlation fig-pos='H' width=70%}
+
+![Approximate operational idle time by hour.](plots/idle_time.png){#fig-app-idle-time fig-pos='H' width=80%}
 
 ## Feature Engineering (3.1)
 

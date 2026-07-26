@@ -5,33 +5,28 @@ descriptive spatial analytics, predictive modelling of demand (SVM and
 neural networks), and reinforcement learning for smart charging.
 
 ## Descriptive (Spatial) Analytics {#sec-eda}
-To better understand the characteristics of taxi demand before developing predictive models, we first perform a descriptive analysis of the dataset. The analysis investigates spatial and temporal demand patterns, examines trip characteristics, compares different spatial aggregation levels, and identifies persistent demand hot spots. 
-### Demand Patterns
-The taxi demand data exhibit strong spatial and temporal heterogeneity. Most trips are relatively short in terms of both travel distance and duration, while trip fares show a pronounced right-skewed distribution. Consequently, the majority of journeys are inexpensive, whereas a comparatively small number of long-distance trips account for substantially higher fares.
-Spatially, taxi activity is highly concentrated in a limited number of locations. Pickup and dropoff demand are strongly correlated, indicating that areas generating many departures also receive many arrivals. However, comparing pickup and dropoff distributions reveals localized differences that likely reflect commuting flows, airport traffic, and the separation of residential and commercial districts.
-Additional descriptive statistics and distribution plots are provided in **Appendix A**.
+
+To better understand the characteristics of taxi demand before developing predictive models, we first perform a descriptive analysis of the dataset. The analysis investigates spatial and temporal demand patterns, compares different spatial representations, and identifies persistent demand hot spots.
 
 ### Spatial Patterns
-Taxi demand was analysed using community areas, census tracts and H3 hexagonal grids at multiple resolutions. Although all representations reveal similar large-scale demand structures, the selected spatial resolution considerably influences the observed level of detail.
-Community areas provide a coarse overview of demand, while census tracts capture substantially finer local variation. H3 resolution 7 offers a compromise between spatial detail and robustness, whereas H3 resolution 8 largely reproduces the census tract representation. This behaviour results from the privacy-preserving coordinate masking applied to the original dataset, where published coordinates correspond to census tract centroids whenever available.
-**[Figure X: Spatial demand distribution]**
-Across all spatial resolutions, demand remains highly concentrated in only a small number of regions. Increasing spatial resolution improves the visibility of localized demand patterns but simultaneously introduces considerable sparsity, with many spatial units containing few or no observations during large parts of the observation period.
-Further spatial comparisons, concentration measures, Lorenz curves and pickup-dropoff difference maps are shown in **Appendix A**.
+
+Taxi demand was analysed using community areas, census tracts and H3 hexagonal grids at multiple spatial resolutions. While all representations reveal the same overall demand structure, the choice of spatial unit strongly affects the level of detail. Community areas provide a coarse overview, whereas census tracts capture much finer local variation. H3 resolution 7 offers a good compromise between spatial detail and data density, while H3 resolution 8 provides little additional information because the published coordinates are masked to census tract centroids.
+
+Demand is highly concentrated across all spatial representations. The Lorenz curves (@fig-app-demand-concentration) show that only a small fraction of spatial units accounts for the majority of all taxi trips, indicating a strong spatial imbalance. Increasing the spatial resolution reveals more localized demand patterns but also substantially increases sparsity. For example, 96.1% of census tract hour-cells and 89.2% of H3-9 hour-cells contain no trips, whereas community areas remain considerably denser (45.2% empty cells). H3 resolution 7 therefore provides a good trade-off between spatial detail and data availability and is chosen as the H3-Resolution used for the predictive analysis. Spatial demand maps, Lorenz curves, sparsity statistics and additional spatial analyses are provided in Appendix A (@fig-app-spatial-pickup–@fig-app-demand-concentration, @fig-app-trip-length-duration and @tbl-spatial-sparsity).
 
 ### Temporal Patterns
-Taxi demand follows clear and recurring temporal patterns. Demand is lowest during the early morning hours, increases throughout the day and reaches pronounced peaks during commuting and evening leisure periods. Distinct differences are also observed between weekdays and weekends, reflecting changes in travel behaviour.
-**[Figure X: Average hourly taxi demand]**
-Besides the intraday cycle, demand also varies systematically across weekdays and seasons, indicating that temporal information is highly informative for subsequent forecasting models.
-Additional temporal analyses, including weekday-weekend comparisons and seasonal demand patterns, are provided in **Appendix A**.
 
-### Effect of Spatio-Temporal Resolution
-Abstimmen mit predicive
+Taxi demand exhibits pronounced daily and weekly patterns. Demand is lowest during the early morning hours, increases rapidly from around 6 a.m., and remains high throughout the afternoon before declining again during the night. Weekday demand is characterized by pronounced commuting peaks, whereas weekend demand shifts towards the late evening and nighttime hours.
+
+The daily demand series further reveals a stable weekly seasonality throughout the observation period, while demand levels gradually increase from early 2024 into 2025 before remaining relatively stable. Short-term drops are visible around holiday periods, most notably at the end of each year.
+
+Trip characteristics also vary systematically over the day. Average trip distances are largest during nighttime when traffic volumes are lower, whereas average travel speeds decrease during periods of high demand, reflecting congestion during commuting hours. Approximate operational idle time follows the opposite behaviour, reaching its minimum during the morning demand peak and increasing during periods of lower demand. Additional temporal analyses are shown in Appendix A (@fig-app-daily-demand–@fig-app-idle-time).
 
 ### Demand Hot Spots
-Persistent demand hot spots were identified using Gaussian Mixture Models (GMM) and Kernel Density Estimation (KDE). Both approaches consistently identify the central business district and major transportation hubs as the dominant centres of taxi activity.
-**[Figure X: Gaussian Mixture Model hot spots]**
-The probabilistic clustering produced by the GMM groups regions with similar spatial demand characteristics, while KDE provides a continuous representation of demand intensity. Both methods highlight areas associated with dense commercial activity, transportation infrastructure and entertainment facilities, demonstrating the strong influence of land use on taxi demand.
-The complementary KDE visualisation is presented in **Appendix A**.
+
+Persistent demand hot spots were identified using Gaussian Mixture Models (GMM) and Kernel Density Estimation (KDE). Both methods consistently identify the Chicago central business district as the dominant concentration of taxi demand, while additional demand centres emerge around O'Hare Airport and Midway Airport. The KDE highlights a continuous demand corridor extending through the city centre, whereas the GMM partitions the city into regions with similar demand characteristics.
+
+A comparison with the aggregated POI data shows that the identified clusters correspond closely to different urban functions. Airport clusters are dominated by transportation-related POIs, while central clusters contain high densities of restaurants, retail and commercial establishments. Residential areas exhibit substantially lower demand densities. These findings indicate that land use is a strong determinant of taxi demand and motivate the inclusion of spatial context features in the predictive models. The hotspot visualizations are provided in Appendix A (@fig-app-gmm and @fig-app-kde).
 
 ## Predictive Analytics (SVM & Neural Networks) {#sec-prediction}
 
