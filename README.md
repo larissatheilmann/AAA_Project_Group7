@@ -65,7 +65,9 @@ This will create a `.venv` directory and register the Python kernel so Quarto ca
 ### 3. Place required data
 The Taxi Data that is being worked with was downloaded from https://data.cityofchicago.org/Transportation/Taxi-Trips-2024-/ajtu-isnz/about_data.
 
-Download the dataset or use tha dataset that was sent via E-Mail. Then place the dataset inside the `data\` directory before running the notebook.
+The data we downloaded was from 01-01-2024 until 01-06-2026.
+
+Download the dataset either from the oficial website or from our google Drive: [Drive](https://drive.google.com/drive/folders/1aXOxPQLf2QpgRAAtVrB-wtRFkdbzl5mN?usp=sharing). Then place the dataset inside the `data\` directory before running the notebook.
 
 ### 4. Execute notebooks
 The notebooks are designed to be executed in the following order.
