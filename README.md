@@ -26,23 +26,23 @@ The project combines
 
 
 ## Repository Structure
-.
-├── assets/                    
-├── data/                      Input datasets and processed data
-├── docs/
-│   ├── maps/                  Generated maps
-│   ├── plots/                 Generated figures
-│   ├── report.pdf             Final report
-├── models_predictions/        Saved prediction models
-├── notebooks/                 Complete analysis pipeline
-├── partials/                  Custom LaTeX templates
-├── sections/                  Sections of the report
-├── README.md                  
-├── references.bib             Literature references
-├── pyproject.toml             Python dependencies
-├── report.qmd                 Main Quarto report
-├── uv.lock                    Locked dependency versions
-└── _quarto.yml                Quarto configuration
+| Path | Description |
+|------|-------------|
+| `assets/` |  |
+| `data/` | Input datasets and processed data |
+| `docs/` |  |
+| `├── plots/` | Generated plots |
+| `├── report.pdf` | Final project report |
+| `models_predictions/` | Saved prediction models |
+| `notebooks/` | Complete analysis pipeline |
+| `partials/` | Custom LaTeX templates |
+| `sections/` | Individual report sections |
+| `README.md` | Project documentation |
+| `references.bib` | Literature references |
+| `pyproject.toml` | Project dependencies |
+| `report.qmd` | Main Quarto report |
+| `uv.lock` | Locked dependency versions |
+| `_quarto.yml` | Quarto project configuration |
 
 
 ### 1. Prerequisites
@@ -101,7 +101,7 @@ The project can be reproduced by
 
 1. cloning the repository,
 2. running `uv sync`,
-3. placing the required datasets into `data/`,
+3. placing the required dataset into `data/`,
 4. executing the notebooks in the order described above,
 5. rendering the report with Quarto.
 
