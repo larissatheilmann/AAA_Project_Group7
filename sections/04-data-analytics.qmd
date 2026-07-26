@@ -145,10 +145,7 @@ The selected architectures vary by level without following a simple pattern.
 Community/hourly uses the largest and deepest network tested. The two census
 levels, the sparsest in the dataset, both select the smallest. Dropout is
 selected only at h3_7/daily and census/daily, the two levels most prone to
-overfitting (@tbl-fnn-architecture-by-level). Combined with the SVM results,
-both models suggest the same conclusion: the historical average already
-captures most of the predictable signal, and daily grids leave little room
-for either model to improve on it
+overfitting (@tbl-fnn-architecture-by-level). This leads to the following conclusion: The historical baseline already captures most of the predictable signal, and daily grids leave little room for the neural network to improve on.
 
 ### Model Comparison
 
@@ -186,7 +183,7 @@ beats the baseline on every hourly tier with any demand, gaining 11.3% on
 medium-demand hours and 11.1% on high-demand hours. As shown in (@fig-svm-vs-nn-hourofday-relerr), both models follow a similar pattern of relative
 error across the day, with higher values in the early morning hours (0–4),
 where mean demand is lowest. As shown in (@fig-svm-vs-nn-dayofweek-relerr), relative error increases towards the weekend for both
-models and both temporal resolutions
+models and both temporal resolutions.
 
 A forecast that only works in good weather would be of limited use for
 operational planning. Neither model shows this weakness. The SVM's daily
@@ -250,7 +247,7 @@ controller that decides how fast an electric taxi should charge at home between
 shifts, balancing the electricity bill against the risk of leaving too little
 charge for the next day's work. We compared two reinforcement-learning methods,
 Tabular Q-Learning and a Deep Q-Network (DQN). The simpler Tabular approach is the
-one we recommend deploying now; DQN is held back for later, more complex versions
+one we recommend deploying now. DQN is held back for later, more complex versions
 of the problem, for the reasons that follow.
 
 ### Problem Framing & Methodology

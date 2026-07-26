@@ -26,17 +26,10 @@ rather than a bespoke fine-grained grid.
 
 Demand can be predicted for a specific place and time, not just extrapolated from
 the previous hour, though within limits. Both models are most accurate at the
-same geography, Chicago's 77 community areas, and neither wins outright; they
+same geography, Chicago's 77 community areas, and neither wins outright. They
 divide the work by time horizon. The support vector machine is the more reliable
 day-ahead forecaster, beating a historical-average benchmark by about 6.5% and
-holding that edge on quiet and busy days alike. The neural network is stronger
-within the hour, beating the same benchmark by about 9.7%, with its advantage
-concentrated on the busy hours where the support vector machine slips. Neither
-falters on rainy days, the rainy-Sunday scenario the brief singled out. The deep
-model does not earn its added complexity everywhere: at day-ahead resolution it
-trails even the naive benchmark. The two are best run together, the support vector
-machine sizing the fleet a day out and the neural network repositioning it within
-a shift once the operation is ready.
+holding that edge on quiet and busy days alike. At hourly resolution, the neural network outperforms the benchmark by around 9.7%, with the gap being most visible during peak hours where the SVM performs less well. Notably, neither model struggles on rainy days. At daily resolution, however, the neural network performs worse than even the naive benchmark. Running both models in combination therefore seems more practical than choosing one: the SVM for day-ahead planning and the neural network for adjustments within a shift.
 
 For smart charging, Tabular Q-Learning is the method to deploy first. It converged
 reliably across every training run and cut the average daily charging cost by
@@ -57,10 +50,4 @@ unusually long shifts or drivers without home access. This rests on the operatio
 case rather than a full comparison of installation cost against public-charging
 fees, which a follow-up should price out.
 
-These findings are directional, not final. They come from Chicago's existing taxi
-trade rather than the client's own electric fleet, and the demand models beat a
-simple historical average only modestly, so location and calendar already explain
-most of what the data can. The charging result likewise rests on a fixed daily
-price curve and a single vehicle, not a full fleet in a live market. Validating
-both against the client's own operating data, once it exists, would do more to
-confirm these conclusions than any further modelling.
+The results should be interpreted with some caution. They are based on Chicago taxi trips rather than the client's own electric fleet, and the demand models only modestly outperform a simple historical average, which suggests that location and calendar already account for most of the predictable variation. The charging result is also limited in scope: it assumes a fixed daily price curve and a single vehicle, not a full fleet in a real market. Once the client begins operating, validating these results against actual fleet data would be an important next step.

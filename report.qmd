@@ -1,5 +1,5 @@
 ---
-title: "Project Report" # Give your report a title
+title: "Urban Ride-Hailing in Chicago: Descriptive, Predictive and Reinforcement Learning Approaches for Electric Fleet Operations" # Give your report a title
 course: "Advanced Analytics and Applications" # Specify the course name
 team: "07" # Specify your team number
 author:

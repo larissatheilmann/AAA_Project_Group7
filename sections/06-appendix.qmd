@@ -138,6 +138,8 @@ the other three add the POI and weather blocks to it.
 
 {{< embed "notebooks/3.2b PredictionSVMResidual.ipynb#fig-svr-direct-vs-residual-final" >}}
 
+\newpage 
+
 ## Deep Learning Prediction (3.3)
 
 The grid search was run independently for each of the six spatial and temporal
@@ -186,10 +188,10 @@ count space.
 
 {{< embed "notebooks/3.3 PredictionDeepLearning.ipynb#fig-fnn-skill-by-level" >}}
 
-## SVM vs. Neural Network Performance Comparison (3.4)
 
+## SVM vs. Neural Network Performance Comparison (3.4)
 ```{=latex}
-\clearpage
+\FloatBarrier
 ```
 
 {{< embed "notebooks/3.4 ModelPerformanceVisualization.ipynb#tbl-svm-vs-nn-overall" >}}
@@ -242,7 +244,7 @@ count space.
 
 {{< embed "notebooks/4.1 ReinforcementLearning.ipynb#tbl-dqn-breakdown" >}}
 
-*No additional labeled figures or tables from this notebook.*
+
 
 ```{=latex}
 \clearpage

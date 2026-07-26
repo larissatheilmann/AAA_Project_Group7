@@ -12,8 +12,7 @@
 
 Three raw datasets underpin the analysis: taxi trip records, hourly weather
 observations, points of interest, accompanied by a boundary layer of Chicago's community
-areas. Each is described below by origin, coverage, and native granularity;
-the cleaning and feature-engineering steps applied to each follow in @sec-data-prep.
+areas. Each is described below by origin, coverage, and native granularity, the cleaning and feature-engineering steps applied to each follow in @sec-data-prep.
 
 The taxi trip records come from the Chicago Data Portal's Taxi Trips dataset,
 which publishes one row per dispatched, metered taxi ride in the city. The raw

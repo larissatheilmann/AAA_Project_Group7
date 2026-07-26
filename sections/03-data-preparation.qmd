@@ -39,7 +39,7 @@ per trip at resolutions 7, 8, and 9, which gives the hexagonal units used
 alongside tracts and community areas later.
 
 Rows are removed on two grounds. Records missing a taxi identifier, an end
-timestamp, a duration, a distance, or a fare total are dropped outright; each of
+timestamp, a duration, a distance, or a fare total are dropped outright. Each of
 these is absent on well under 0.2% of trips, a share small enough that
 imputation would add assumptions without adding information. A sanity filter
 then removes trips with a non-positive duration or distance, or a negative
@@ -49,8 +49,7 @@ long airport transfers, are legitimate demand and are deliberately kept.
 
 Because census tract is withheld far more often than community area, the cleaned
 data is kept as two parallel datasets rather than forcing one compromise on every
-downstream analysis. The larger retains every trip with a known community area;
-the stricter keeps only those that also carry a census tract. Both are truncated
+downstream analysis. The larger retains every trip with a known community area, the stricter keeps only those that also carry a census tract. Both are truncated
 to the last hour the weather series covers, so that no model can later be trained
 or evaluated against forward-filled weather. That leaves **12,949,755 trips at
 community-area completeness** and **6,052,512 at census-tract completeness**,
@@ -66,7 +65,7 @@ The final dataset comprises 17,544 hourly observations across nine columns (a ti
 six raw variables (@tbl-meteo-var), and two engineered wind variables) with no missing values, consistent 
 with the reanalysis nature of the data. A small number of precipitation and snow cover 
 values were marginally negative due to rounding errors in the underlying computations 
-and were clipped to zero; temperature and precipitation were additionally converted to 
+and were clipped to zero. Temperature and precipitation were additionally converted to 
 Celsius and millimeters for interpretability. Exploratory analysis confirms clear seasonal 
 patterns, with snow cover and snow depth peaking between November and March/April and 
 falling to near zero in summer. Snow cover approaches 100% precisely when snow depth 
@@ -117,5 +116,5 @@ polygons, giving one crosswalk across all three spatial units.
 Every unit is then crossed with two temporal bins, hourly and daily, 
 with pickups aggregated against all spatial and temporal levels. 
 Spatial units that never register a single pickup over the full 2.4-year window are
-dropped before the grid is written; the reduction removes only all-zero rows
+dropped before the grid is written. The reduction removes only all-zero rows
 and costs no trips.
