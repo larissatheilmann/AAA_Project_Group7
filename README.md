@@ -63,7 +63,9 @@ uv run python -m ipykernel install --user --name team-project-template --display
 This will create a `.venv` directory and register the Python kernel so Quarto can find it.
 
 ### 3. Place required data
-Place the required Chicago Taxi Trips dataset inside the `data\`directory before running the notebook.
+The Taxi Data that is being worked with was downloaded from https://data.cityofchicago.org/Transportation/Taxi-Trips-2024-/ajtu-isnz/about_data.
+
+Download the dataset or use tha dataset that was sent via E-Mail. Then place the dataset inside the `data\` directory before running the notebook.
 
 ### 4. Execute notebooks
 The notebooks are designed to be executed in the following order.
